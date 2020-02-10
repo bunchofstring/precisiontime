@@ -3,7 +3,9 @@ package com.example.precisiontimetest;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -14,18 +16,21 @@ import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
 
-    private final static long SHORT_TIMEOUT = 500L;
-    private final static long WAIT_FOR_IDLE_TIMEOUT = 1000L;
+    private final static long SHORT_TIMEOUT = 2000L;
+    private final static long WAIT_FOR_IDLE_TIMEOUT = 500L;
     private final static long PREVIOUS_WAIT_FOR_IDLE_TIMEOUT = Configurator.getInstance().getWaitForIdleTimeout();
     private final static String NEW_NTP_HOST = "nist.time.gov";
 
@@ -42,17 +47,18 @@ public class ExampleInstrumentedTest {
     @AfterClass
     public static void teardown(){
         Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
-        getNtpHostField().setText(previousNtpServer);
-        assertTrue(getDevice().pressEnter());
-    }
-
-    @Before
-    public void setupTest(){
-        //launchApp();
+        launchApp();
+        //enterNtpHost(previousNtpServer);
     }
 
     @Test
-    public void test_WhenLaunch_ThenDoNotAutoFocus() {
+    public void test_GivenNotRunning_WhenLaunch_ThenDoNotAutoFocus() throws IOException {
+        //Given
+        Runtime.getRuntime().exec(new String[] {"am", "force-stop", getPackageName()});
+
+        //When
+        launchApp();
+
         //Then
         assertFalse(getNtpHostField().isFocused());
     }
@@ -60,6 +66,7 @@ public class ExampleInstrumentedTest {
     @Test
     public void test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus() {
         //Given
+        launchApp();
         UiObject2 ntpHostField = getNtpHostField();
         assertFalse(ntpHostField.isFocused());
 
@@ -73,15 +80,23 @@ public class ExampleInstrumentedTest {
     @Test
     public void test_WhenChangeServerUrl_ThenUpdateLabel() {
         //Given
-        UiObject2 ntpHostField = getNtpHostField();
+        launchApp();
 
         //When
-        ntpHostField.setText(NEW_NTP_HOST);
-        assertTrue(getDevice().pressEnter());
+        enterNtpHost(NEW_NTP_HOST);
 
         //Then
         assertNotNull(getDevice().wait(Until.findObject(By
-                .res(getPackageName(),"status_actively_syncing")), 3000));
+                .res(getPackageName(),"status_actively_syncing")), SHORT_TIMEOUT));
+    }
+
+    private static void enterNtpHost(@NonNull String host){
+        UiObject2 ntpHostField = getNtpHostField();
+        ntpHostField.click();
+        ntpHostField.setText(host);
+
+        assertTrue(getDevice().pressEnter());
+        getDevice().waitForIdle(5000L);
     }
 
     private static UiObject2 getNtpHostField(){
@@ -98,7 +113,6 @@ public class ExampleInstrumentedTest {
 
     private static String getPackageName(){
         return InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName();
-        //return getClass().getPackage().getName();
     }
 
     private static UiDevice getDevice(){

@@ -44,6 +44,7 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void start() {
+        Log.d(TAG, "start()");
         if(!isStarted) {
             isStarted = true;
             sync();
@@ -52,6 +53,7 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void stop() {
+        Log.d(TAG, "stop()");
         isStarted = false;
         stopPeriodicSync();
     }
@@ -95,6 +97,7 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void setSource(@NonNull String host) {
+        Log.d(TAG, "setSource(...) host="+host);
         boolean needsSync = (!host.equals(this.host));
         this.host = host;
 
@@ -134,6 +137,7 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     private void onError(Throwable t){
         Log.v(TAG, "onError(...) t="+t);
+        isSyncing = false;
         t.printStackTrace();
     }
 
@@ -153,7 +157,7 @@ public class NtpTimestampProvider implements TimestampProvider {
     @SuppressLint("CheckResult")
     private void sync(){
         boolean isInitialized = TrueTimeRx.isInitialized();
-        Log.d(TAG, "sync() isInitialized="+isInitialized);
+        Log.d(TAG, "sync() host="+host+" isInitialized="+isInitialized);
         isSyncing = true;
 
         TrueTimeRx tt = TrueTimeRx.build();
