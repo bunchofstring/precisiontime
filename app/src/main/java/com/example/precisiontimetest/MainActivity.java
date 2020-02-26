@@ -20,7 +20,7 @@ import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static String TAG = AppCompatActivity.class.getSimpleName();
+    private final static String TAG = MainActivity.class.getSimpleName();
 
     private final static long UNDEFINED_TIMESTAMP = -1L;
     private final static String UNDEFINED_TIME_LABEL = "?";
@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
         hostField.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_UP) && (keyCode == KeyEvent.KEYCODE_ENTER)){
                 setHost(((EditText) v).getText().toString());
-//findViewById(R.id.outer_container).requestFocus();
-hostField.clearFocus();
+                hostField.clearFocus();
                 new Handler(getMainLooper()).postDelayed(() -> findViewById(R.id.outer_container).requestFocus(),1L);
             }
             return false;

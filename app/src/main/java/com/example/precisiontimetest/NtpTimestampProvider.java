@@ -98,12 +98,11 @@ public class NtpTimestampProvider implements TimestampProvider {
     @Override
     public void setSource(@NonNull String host) {
         Log.d(TAG, "setSource(...) host="+host);
-        boolean needsSync = (!host.equals(this.host));
-        this.host = host;
-
-        //Defence against misuse
-        if(needsSync && isStarted){
-            sync();
+        if(!host.equals(this.host)) {
+            this.host = host;
+            if(isStarted) {
+                sync();
+            }
         }
     }
 
@@ -123,8 +122,8 @@ public class NtpTimestampProvider implements TimestampProvider {
         }else{
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(lastSyncTimestamp);
-            long diff = currentTime.getTimeInMillis() - cal.getTimeInMillis();
-            return diff < SYNC_INTERVAL_MS;
+            long elapsedSinceLastSync = currentTime.getTimeInMillis() - cal.getTimeInMillis();
+            return elapsedSinceLastSync < SYNC_INTERVAL_MS;
         }
     }
 
@@ -164,7 +163,7 @@ public class NtpTimestampProvider implements TimestampProvider {
         if(isInitialized){
             //noinspection ResultOfMethodCallIgnored
             tt.initializeNtp(host)
-                    .map(longs -> TrueTime.now())
+                    .map(longs -> TrueTimeRx.now())
                     .subscribeOn(Schedulers.io())
                     //Method reference does not work for these subscribers
                     .subscribe(date -> onSync(date),throwable -> onError(throwable));
@@ -179,7 +178,7 @@ public class NtpTimestampProvider implements TimestampProvider {
         //devices, this helps minimize the total error due to drift.
         stopPeriodicSync();
         long orchestrated = getMillisecondsToSync();
-        periodicSync = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(this::sync);
+        periodicSync = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(() -> sync());
     }
 
     private void stopPeriodicSync(){

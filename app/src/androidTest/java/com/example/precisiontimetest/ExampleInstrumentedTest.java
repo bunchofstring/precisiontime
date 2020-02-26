@@ -1,8 +1,10 @@
 package com.example.precisiontimetest;
 
+import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Debug;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -17,10 +19,13 @@ import androidx.test.uiautomator.Until;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Random;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,12 +35,15 @@ import static org.junit.Assert.assertTrue;
 public class ExampleInstrumentedTest {
 
     private final static long SHORT_TIMEOUT = 2000L;
-    private final static long WAIT_FOR_IDLE_TIMEOUT = 500L;
+    private final static long LONG_TIMEOUT = 1000 * 60 * 1L;
+    private final static long WAIT_FOR_IDLE_TIMEOUT = 100L;
+    private final static long KEYBOARD_DISMISSAL_TIME = 200L;
     private final static long PREVIOUS_WAIT_FOR_IDLE_TIMEOUT = Configurator.getInstance().getWaitForIdleTimeout();
-    private final static String NEW_NTP_HOST = "nist.time.gov";
-
+    private final static String NEW_NTP_HOST = "time.nist.gov";
 
     private static String previousNtpServer;
+
+    @Rule public NonDeterministic nonDeterministic = new NonDeterministic();
 
     @BeforeClass
     public static void setup(){
@@ -46,21 +54,42 @@ public class ExampleInstrumentedTest {
 
     @AfterClass
     public static void teardown(){
-        Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
         launchApp();
-        //enterNtpHost(previousNtpServer);
+        enterNtpHost(previousNtpServer);
+        Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
     }
 
+    @Flaky
     @Test
-    public void test_GivenNotRunning_WhenLaunch_ThenDoNotAutoFocus() throws IOException {
-        //Given
-        Runtime.getRuntime().exec(new String[] {"am", "force-stop", getPackageName()});
-
+    //TODO: Isolate the instability that comes with an unreliable Internet connection
+    public void test_WhenLaunch_ThenDisplayTime() {
         //When
         launchApp();
 
         //Then
-        assertFalse(getNtpHostField().isFocused());
+        assertNotNull(getTimeObject());
+    }
+
+    @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
+    @Test
+    public void test_NonDeterministic(){
+        final int range = 100;
+        final int cutoffAfter = 10;
+        final int value = new Random().nextInt(range)+1;
+        assertTrue(value+" is beyond the cutoff", value <= cutoffAfter);
+    }
+
+    @Test
+    public void test_GivenMemoryPressure_ThenOperateWithinThreshold(){
+        //TODO: Set a threshold based on actual, tax the system, and take a measurement
+        Debug.MemoryInfo mi = new Debug.MemoryInfo();
+        Debug.getMemoryInfo(mi);
+        Log.d("performance","debug="+mi.getMemoryStat("summary.java-heap"));
+
+        ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi2);
+        Log.d("performance","am="+mi2.totalMem+" "+mi2.availMem+" "+mi2.threshold+" "+mi2.lowMemory);
     }
 
     @Test
@@ -78,16 +107,35 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    public void test_WhenChangeServerUrl_ThenUpdateLabel() {
+    public void test_GivenNotRunning_WhenLaunch_ThenDoNotAutoFocus() throws IOException {
+        //Given
+        Runtime.getRuntime().exec(new String[] {"am", "force-stop", getPackageName()});
+
+        //When
+        launchApp();
+
+        //Then
+        assertFalse(getNtpHostField().isFocused());
+    }
+
+    @Test
+    public void test_WhenChangeServerUrl_ThenReSync() {
         //Given
         launchApp();
+        getTimeObject();
 
         //When
         enterNtpHost(NEW_NTP_HOST);
 
         //Then
         assertNotNull(getDevice().wait(Until.findObject(By
-                .res(getPackageName(),"status_actively_syncing")), SHORT_TIMEOUT));
+                .res(getPackageName(), "status_actively_syncing")), SHORT_TIMEOUT));
+    }
+
+    private UiObject2 getTimeObject(){
+        return getDevice().wait(Until.findObject(By
+                .res(getPackageName(),"current_time")
+                .text(Pattern.compile(".*\\d.*"))), LONG_TIMEOUT);
     }
 
     private static void enterNtpHost(@NonNull String host){
@@ -95,8 +143,9 @@ public class ExampleInstrumentedTest {
         ntpHostField.click();
         ntpHostField.setText(host);
 
+        //Needs a bit more time to dismiss the keyboard consistently
+        getDevice().waitForIdle(KEYBOARD_DISMISSAL_TIME);
         assertTrue(getDevice().pressEnter());
-        getDevice().waitForIdle(5000L);
     }
 
     private static UiObject2 getNtpHostField(){
