@@ -18,6 +18,7 @@ import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,15 +36,18 @@ import static org.junit.Assert.assertTrue;
 public class ExampleInstrumentedTest {
 
     private final static long SHORT_TIMEOUT = 2000L;
-    private final static long LONG_TIMEOUT = 1000 * 60 * 1L;
+    private final static long LONG_TIMEOUT = 1000 * 60 * 3L;
     private final static long WAIT_FOR_IDLE_TIMEOUT = 100L;
     private final static long KEYBOARD_DISMISSAL_TIME = 200L;
     private final static long PREVIOUS_WAIT_FOR_IDLE_TIMEOUT = Configurator.getInstance().getWaitForIdleTimeout();
     private final static String NEW_NTP_HOST = "time.nist.gov";
+    private final static String RES_ID_PROGRESS_INDICATOR = "status_actively_syncing";
+    private final static String RES_ID_TIME_LABEL = "current_time";
 
     private static String previousNtpServer;
 
-    @Rule public NonDeterministic nonDeterministic = new NonDeterministic();
+    @Rule
+    public NonDeterministic nonDeterministic = new NonDeterministic();
 
     @BeforeClass
     public static void setup(){
@@ -85,10 +89,15 @@ public class ExampleInstrumentedTest {
         Debug.MemoryInfo mi = new Debug.MemoryInfo();
         Debug.getMemoryInfo(mi);
         Log.d("performance","debug="+mi.getMemoryStat("summary.java-heap"));
+        Log.d("performance","debug="+mi.getMemoryStat("summary.total-pss"));
 
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        activityManager.getMemoryInfo(mi2);
+        if(activityManager != null){
+            activityManager.getMemoryInfo(mi2);
+        }else{
+            Assert.fail("Could not determine memory usage");
+        }
         Log.d("performance","am="+mi2.totalMem+" "+mi2.availMem+" "+mi2.threshold+" "+mi2.lowMemory);
     }
 
@@ -97,13 +106,13 @@ public class ExampleInstrumentedTest {
         //Given
         launchApp();
         UiObject2 ntpHostField = getNtpHostField();
-        assertFalse(ntpHostField.isFocused());
+        assertFalse("Unexpected focus on NTP host field", ntpHostField.isFocused());
 
         //When
         ntpHostField.click();
 
         //Then
-        assertTrue(ntpHostField.isFocused());
+        assertTrue("NTP host field not focused", ntpHostField.isFocused());
     }
 
     @Test
@@ -115,26 +124,27 @@ public class ExampleInstrumentedTest {
         launchApp();
 
         //Then
-        assertFalse(getNtpHostField().isFocused());
+        assertFalse("Text field stole focus on launch", getNtpHostField().isFocused());
     }
 
     @Test
-    public void test_WhenChangeServerUrl_ThenReSync() {
+    public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         launchApp();
-        getTimeObject();
+        assertNotNull("Time not displayed", getTimeObject());
 
         //When
         enterNtpHost(NEW_NTP_HOST);
 
         //Then
-        assertNotNull(getDevice().wait(Until.findObject(By
-                .res(getPackageName(), "status_actively_syncing")), SHORT_TIMEOUT));
+        UiObject2 progressIndicator = getDevice().wait(Until.findObject(By
+                .res(getPackageName(), RES_ID_PROGRESS_INDICATOR)), SHORT_TIMEOUT);
+        assertNotNull("No indication of re-sync in progress", progressIndicator);
     }
 
     private UiObject2 getTimeObject(){
         return getDevice().wait(Until.findObject(By
-                .res(getPackageName(),"current_time")
+                .res(getPackageName(),RES_ID_TIME_LABEL)
                 .text(Pattern.compile(".*\\d.*"))), LONG_TIMEOUT);
     }
 
@@ -145,7 +155,7 @@ public class ExampleInstrumentedTest {
 
         //Needs a bit more time to dismiss the keyboard consistently
         getDevice().waitForIdle(KEYBOARD_DISMISSAL_TIME);
-        assertTrue(getDevice().pressEnter());
+        assertTrue("Could not apply the value", getDevice().pressEnter());
     }
 
     private static UiObject2 getNtpHostField(){
