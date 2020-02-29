@@ -18,14 +18,15 @@ import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
@@ -84,21 +85,27 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    public void test_GivenMemoryPressure_ThenOperateWithinThreshold(){
+    public void test_GivenMemoryPressure_ThenOperateWithinThreshold() {
         //TODO: Set a threshold based on actual, tax the system, and take a measurement
-        Debug.MemoryInfo mi = new Debug.MemoryInfo();
-        Debug.getMemoryInfo(mi);
-        Log.d("performance","debug="+mi.getMemoryStat("summary.java-heap"));
-        Log.d("performance","debug="+mi.getMemoryStat("summary.total-pss"));
 
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        if(activityManager != null){
-            activityManager.getMemoryInfo(mi2);
-        }else{
-            Assert.fail("Could not determine memory usage");
+        assertNotNull("Could not determine memory usage", activityManager);
+        activityManager.getMemoryInfo(mi2);
+        Log.d("performance (ActivityManager.MemoryInfo)", new StringJoiner("\n"," \n","")
+                .add("totalMem = " + ((float) mi2.totalMem/1024) + "K")
+                .add("availMem = " + ((float) mi2.availMem/1024) + "K")
+                .add("(lmk) threshold = " + ((float) mi2.threshold/1024) + "K")
+                .add("lowMemory = " + mi2.lowMemory)
+                .toString());
+
+        Debug.MemoryInfo mi = new Debug.MemoryInfo();
+        Debug.getMemoryInfo(mi);
+        StringJoiner j = new StringJoiner("\n", " \n", "");
+        for(Map.Entry<String, String> map: mi.getMemoryStats().entrySet()){
+            j.add(map.getKey() + " = " + map.getValue());
         }
-        Log.d("performance","am="+mi2.totalMem+" "+mi2.availMem+" "+mi2.threshold+" "+mi2.lowMemory);
+        Log.d("performance (Debug.MemoryInfo)", j.toString());
     }
 
     @Test

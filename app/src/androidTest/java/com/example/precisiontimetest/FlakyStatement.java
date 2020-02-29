@@ -1,7 +1,5 @@
 package com.example.precisiontimetest;
 
-import androidx.annotation.NonNull;
-
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
@@ -20,7 +18,7 @@ class FlakyStatement extends Statement {
     private final StringJoiner results = new StringJoiner("\n");
     private Throwable lastException = new UnknownError();
 
-    FlakyStatement(@NonNull final Statement base, @NonNull final Description description, @NonNull final Flaky flaky) {
+    FlakyStatement(final Statement base, final Description description, final Flaky flaky) {
         this.base = base;
         this.description = description;
 
@@ -36,9 +34,7 @@ class FlakyStatement extends Statement {
 
     @Override
     public void evaluate() throws Throwable {
-
-        //Run the tests
-        final int failureCount = iterate();
+        final int failureCount = executeIterations();
         logTestExecutionSummary(failureCount);
 
         //Only fail if all tests fail
@@ -47,7 +43,7 @@ class FlakyStatement extends Statement {
         }
     }
 
-    private int iterate() {
+    private int executeIterations() {
         int failures = 0;
 
         for (int i = 0; i < iterations; i++) {
@@ -82,13 +78,13 @@ class FlakyStatement extends Statement {
         log(joiner.toString());
     }
 
-    private void handleTestPass(@NonNull final String iteration){
+    private void handleTestPass(final String iteration){
         final String oneLiner = String.format("Flaky test iteration %s passed", iteration);
         log(oneLiner);
         results.add(oneLiner);
     }
 
-    private void handleTestFailure(@NonNull final String iteration, @NonNull final Throwable t) {
+    private void handleTestFailure(final String iteration, final Throwable t) {
         lastException = t;
         final String oneLiner = String.format("Flaky test iteration %s failed", iteration);
 
