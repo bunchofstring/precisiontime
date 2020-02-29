@@ -64,17 +64,6 @@ public class ExampleInstrumentedTest {
         Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
     }
 
-    @Flaky
-    @Test
-    //TODO: Isolate the instability that comes with an unreliable Internet connection
-    public void test_WhenLaunch_ThenDisplayTime() {
-        //When
-        launchApp();
-
-        //Then
-        assertNotNull(getTimeObject());
-    }
-
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_NonDeterministic(){
@@ -82,6 +71,15 @@ public class ExampleInstrumentedTest {
         final int cutoffAfter = 10;
         final int value = new Random().nextInt(range)+1;
         assertTrue(value+" is beyond the cutoff", value <= cutoffAfter);
+    }
+
+    @Test
+    public void test_WhenLaunch_ThenDisplayTime() {
+        //When
+        launchApp();
+
+        //Then
+        assertNotNull(getTimeObject());
     }
 
     @Test
