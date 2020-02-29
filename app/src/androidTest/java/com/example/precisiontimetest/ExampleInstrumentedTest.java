@@ -48,7 +48,7 @@ public class ExampleInstrumentedTest {
     private static String previousNtpServer;
 
     @Rule
-    public NonDeterministic nonDeterministic = new NonDeterministic();
+    public FlakyTestRule flakyTestRule = new FlakyTestRule();
 
     @BeforeClass
     public static void setup(){
@@ -87,7 +87,6 @@ public class ExampleInstrumentedTest {
     @Test
     public void test_GivenMemoryPressure_ThenOperateWithinThreshold() {
         //TODO: Set a threshold based on actual, tax the system, and take a measurement
-
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
         assertNotNull("Could not determine memory usage", activityManager);

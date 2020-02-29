@@ -29,10 +29,12 @@ import org.junit.runners.model.Statement;
  * <p>
  * Usage:
  * <pre>
- * &#064;Rule public NonDeterministic nonDeterministic = new NonDeterministic();
+ * &#064;Rule
+ * public FlakyTestRule flakyTestRule = new FlakyTestRule();
  *
  * &#064;Flaky
- * &#064;Test public void fetchProfileWithinOneSecond() {
+ * &#064;Test
+ * public void fetchProfileWithinOneSecond() {
  *     //Given: Unknowable network conditions which affect timing
  *     //When: Fetch profile from remote server
  *     final long startTime = System.nanoTime();
@@ -44,7 +46,7 @@ import org.junit.runners.model.Statement;
  * </pre>
  */
 
-public class NonDeterministic implements TestRule {
+public class FlakyTestRule implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
