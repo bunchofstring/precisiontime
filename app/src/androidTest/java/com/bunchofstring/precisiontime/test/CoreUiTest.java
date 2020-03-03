@@ -16,7 +16,6 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
-import com.bunchofstring.precisiontime.NtpTimestampProvider;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
 
@@ -32,12 +31,11 @@ import java.util.Random;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class CoreTest {
+public class CoreUiTest {
 
     private final static long SHORT_TIMEOUT = 2000L;
     private final static long LONG_TIMEOUT = 1000 * 60 * 3L;
@@ -65,22 +63,6 @@ public class CoreTest {
         launchApp();
         enterNtpHost(previousNtpServer);
         Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
-    }
-
-    private static final String NEW_SOURCE = "NEW_SOURCE_FAKE";
-    private NtpTimestampProvider ntp = new NtpTimestampProvider(-1L);
-
-    @Test
-    public void sourceManagement() {
-        String previousSource = null;
-        try {
-            previousSource = ntp.getSource();
-            ntp.setSource(NEW_SOURCE);
-            assertEquals(NEW_SOURCE, ntp.getSource());
-        } finally {
-            ntp.setSource(previousSource);
-        }
-
     }
 
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
