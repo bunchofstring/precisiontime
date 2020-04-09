@@ -53,7 +53,7 @@ public class FlakyTestRule implements TestRule {
         Flaky flaky = description.getAnnotation(Flaky.class);
         if (flaky == null) {
             return base;
-        }else{
+        } else {
             return new FlakyStatement(base, description, flaky);
         }
     }

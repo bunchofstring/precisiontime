@@ -1,0 +1,10 @@
+<configuration description="Runs the hello world test">
+    <!--<test class="com.bunchofstring.precisiontime.test.CoreUiTest" />
+    <test class="com.android.tradefed.testtype.HostTest">
+        <option name="class" value="com.android.tradefed.build.BuildInfoTest" />
+    </test>-->
+    <test class="com.android.tradefed.testtype.UiAutomatorTest">
+        <option name="jar-path" value="../coolio/uiautomator.skeletontest.jar" />
+        <option name="class" value="com.bunchofstring.precisiontime.test.CoreUiTest" />
+    </test>
+</configuration>

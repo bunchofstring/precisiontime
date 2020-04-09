@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.test:rules:1.2.0'
+    implementation 'androidx.test:runner:1.2.0'
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
+repositories {
+    maven { url "https://jitpack.io" }
+}

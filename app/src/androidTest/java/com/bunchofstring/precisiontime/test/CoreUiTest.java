@@ -19,13 +19,21 @@ import androidx.test.uiautomator.Until;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Request;
+import org.junit.runner.Result;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringJoiner;
@@ -51,8 +59,12 @@ public class CoreUiTest {
     @Rule
     public FlakyTestRule flakyTestRule = new FlakyTestRule();
 
+    //@ClassRule
+    //public static FlakyTestRule flakyClassRule = new FlakyTestRule();
+
     @BeforeClass
     public static void setup(){
+        System.out.println("talldave - beforeclass");
         Configurator.getInstance().setWaitForIdleTimeout(WAIT_FOR_IDLE_TIMEOUT);
         launchApp();
         previousNtpServer = getNtpHostField().getText();
@@ -60,16 +72,28 @@ public class CoreUiTest {
 
     @AfterClass
     public static void teardown(){
+        System.out.println("talldave - afterclass");
         launchApp();
         enterNtpHost(previousNtpServer);
         Configurator.getInstance().setWaitForIdleTimeout(PREVIOUS_WAIT_FOR_IDLE_TIMEOUT);
+    }
+
+    @Before
+    public void before(){
+        System.out.println("talldave - before");
+    }
+
+    @After
+    public void after(){
+        Debug.stopMethodTracing();
+        System.out.println("talldave - after");
     }
 
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_NonDeterministic(){
         final int range = 10;
-        final int cutoffAfter = 1;
+        final int cutoffAfter = 13;
         final int value = new Random().nextInt(range)+1;
         assertTrue(value+" is beyond the cutoff", value <= cutoffAfter);
     }
@@ -80,6 +104,11 @@ public class CoreUiTest {
         //TODO: Set a threshold based on actual, tax the system, and take a measurement
         Log.d("performance (ActivityManager.MemoryInfo)", getActivityManagerMemoryReport());
         Log.d("performance (Debug.MemoryInfo)", getDebugMemoryReport());
+    }
+
+    @Test
+    public void foo(){
+        assertFalse(false);
     }
 
     @Test
@@ -170,8 +199,11 @@ public class CoreUiTest {
     }
 
     private String getDebugMemoryReport(){
+        long startTime = new Date().getTime();
         Debug.MemoryInfo mi = new Debug.MemoryInfo();
         Debug.getMemoryInfo(mi);
+        System.out.println("talldave debug memory report took " + (startTime - new Date().getTime()) + " ms");
+
         StringJoiner j = new StringJoiner("\n", " \n", "");
         for(Map.Entry<String, String> map: mi.getMemoryStats().entrySet()){
             j.add(map.getKey() + " = " + map.getValue());
@@ -180,10 +212,12 @@ public class CoreUiTest {
     }
 
     private String getActivityManagerMemoryReport(){
+        long startTime = new Date().getTime();
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
         assertNotNull("Could not determine memory usage", activityManager);
         activityManager.getMemoryInfo(mi2);
+        System.out.println("talldave am memory report took " + (startTime - new Date().getTime()) + " ms");
         return new StringJoiner("\n"," \n","")
                 .add("totalMem = " + ((float) mi2.totalMem/1024) + "K")
                 .add("availMem = " + ((float) mi2.availMem/1024) + "K")

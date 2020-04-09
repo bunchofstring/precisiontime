@@ -4,6 +4,7 @@
 
     <!--suppress AndroidDomInspection -->
     <instrumentation android:targetPackage="com.bunchofstring.precisiontime"
-        android:name="androidx.test.runner.AndroidJUnitRunner"/>
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:handleProfiling="true"/>
 
 </manifest>
