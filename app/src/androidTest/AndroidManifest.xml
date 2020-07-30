@@ -2,9 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bunchofstring.precisiontime.test">
 
+    <uses-permission android:name = "android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name = "android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <!--suppress AndroidDomInspection -->
     <instrumentation android:targetPackage="com.bunchofstring.precisiontime"
-        android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:handleProfiling="true"/>
+        android:name="com.bunchofstring.precisiontime.test.core.CustomInstrumentationRunner"
+        android:handleProfiling="true">
+
+        <meta-data
+            android:name="listener"
+            android:value="com.bunchofstring.precisiontime.test.core.FailureListener" />
+
+    </instrumentation>
 
 </manifest>

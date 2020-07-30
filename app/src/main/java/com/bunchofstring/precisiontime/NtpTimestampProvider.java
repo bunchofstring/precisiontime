@@ -13,13 +13,14 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class NtpTimestampProvider implements TimestampProvider {
 
     private static final String TAG = NtpTimestampProvider.class.getSimpleName();
 
-    private static final String DEFAULT_NTP_HOST = "time.nist.gov";
+    private static final String DEFAULT_NTP_HOST = "pool.ntp.org";
     private static final int SYNC_INTERVAL_MS = 1000 * 60 * 10;
 
     private final GregorianCalendar currentTime = new GregorianCalendar();
@@ -153,23 +154,50 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @SuppressLint("CheckResult")
     private void sync(){
+        TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(true);
         boolean isInitialized = TrueTimeRx.isInitialized();
         Log.d(TAG, "sync() host="+host+" isInitialized="+isInitialized);
+
         isSyncing = true;
 
-        TrueTimeRx tt = TrueTimeRx.build();
         if(isInitialized){
             //noinspection ResultOfMethodCallIgnored
             tt.initializeNtp(host)
                     .map(longs -> TrueTimeRx.now())
                     .subscribeOn(Schedulers.io())
                     //Method reference does not work for these subscribers
-                    .subscribe(date -> onSync(date),throwable -> onError(throwable));
+                    .subscribeWith(new DisposableSingleObserver<Date>() {
+                        @Override
+                        public void onSuccess(Date date) {
+                            Log.d(TAG, "Success initialized TrueTime :" + date.toString());
+                            NtpTimestampProvider.this.onSync(date);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
+                            NtpTimestampProvider.this.onError(e);
+                        }
+                    });
+                    //.subscribe(date -> onSync(date),throwable -> onError(throwable));
         }else{
             //noinspection ResultOfMethodCallIgnored
             tt.initializeRx(host)
                     .subscribeOn(Schedulers.io())
-                    .subscribe(date -> onSync(date), throwable -> onError(throwable));
+                    .subscribeWith(new DisposableSingleObserver<Date>() {
+                        @Override
+                        public void onSuccess(Date date) {
+                            Log.d(TAG, "Success initialized TrueTime :" + date.toString());
+                            NtpTimestampProvider.this.onSync(date);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
+                            NtpTimestampProvider.this.onError(e);
+                        }
+                    });
+                    //.subscribe(date -> onSync(date), throwable -> onError(throwable));
         }
 
         //App instances will attempt to sync at roughly the same time. For a set of different

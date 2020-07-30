@@ -1,7 +1,17 @@
-apply plugin: 'java-library'
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 29
+    }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.test:core:1.2.0'
+    implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     implementation 'androidx.test:rules:1.2.0'
     implementation 'androidx.test:runner:1.2.0'
 }

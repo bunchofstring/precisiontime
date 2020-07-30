@@ -8,7 +8,9 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        //testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'com.bunchofstring.precisiontime.test.core.CustomInstrumentationRunner'
         /*testOptions {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
         }*/
@@ -43,4 +45,19 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation project(path: ':flaky')
+    androidTestImplementation project(path: ':capture')
+}
+
+task transferCaptures(type: Exec) {
+    project.gradle.taskGraph.whenReady {
+        connectedDebugAndroidTest {
+            def appId = android.defaultConfig.applicationId;
+            def sourceDirectory = '/sdcard/Android/data/' + appId + '/files'
+            def destinationDirectory = getReportsDir().toString()
+            println "Transferring captures..."
+            println "from " + sourceDirectory
+            println "to " + destinationDirectory
+            commandLine 'adb', 'pull', sourceDirectory, destinationDirectory
+        }
+    }
 }

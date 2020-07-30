@@ -5,8 +5,12 @@ import org.junit.runners.model.Statement;
 
 import java.text.DecimalFormat;
 import java.util.StringJoiner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class FlakyStatement extends Statement {
+
+    private static final Logger LOGGER = Logger.getLogger(FlakyStatement.class.getSimpleName());
 
     private final Statement base;
     private final Description description;
@@ -16,7 +20,7 @@ class FlakyStatement extends Statement {
     private final boolean itemizeSummary;
 
     private final StringJoiner results = new StringJoiner("\n");
-    private Throwable lastException = new UnknownError();
+    private Throwable summaryException = new Throwable("Too flakey");
 
     FlakyStatement(final Statement base, final Description description, final Flaky flaky) {
         this.base = base;
@@ -39,7 +43,7 @@ class FlakyStatement extends Statement {
 
         //Only fail if all tests fail
         if (failureCount == iterations) {
-            throw lastException;
+            throw summaryException;
         }
     }
 
@@ -88,13 +92,13 @@ class FlakyStatement extends Statement {
     }
 
     private void handleTestFailure(final String iteration, final Throwable t) {
-        lastException = t;
+        summaryException.addSuppressed(t);
         final String oneLiner = String.format("Flaky test iteration %s failed", iteration);
 
         if(traceAllFailures){
-            new Throwable(oneLiner, lastException).printStackTrace();
+            LOGGER.log(Level.SEVERE,oneLiner,t);
         } else {
-            log(oneLiner + ": " + lastException.getMessage());
+            log(oneLiner + ": " + t.getMessage());
         }
 
         if(itemizeSummary) {
@@ -103,6 +107,6 @@ class FlakyStatement extends Statement {
     }
 
     private void log(final String message) {
-        System.out.println(message);
+        LOGGER.log(Level.INFO,message);
     }
 }
