@@ -8,13 +8,11 @@ import android.util.Log;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.bunchofstring.precisiontime.NtpTimestampProvider;
-import com.bunchofstring.precisiontime.test.core.PerformanceTests;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import java.util.Date;
 import java.util.Map;
@@ -64,7 +62,7 @@ public class IntegratedUnitTest {
         assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
     }
 
-    @Category(PerformanceTests.class)
+    //@Category(PerformanceTests.class)
     @Test
     public void test_GivenMemoryPressure_ThenOperateWithinThreshold() {
         //TODO: Set a threshold based on actual, tax the system, and take a measurement

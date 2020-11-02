@@ -1,2 +1,5 @@
-include ':app', ':flaky'
+include ':apptest'
+include ':testcore'
+include ':app'
+include ':flaky'
 include ':capture'

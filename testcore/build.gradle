@@ -18,7 +18,6 @@ dependencies {
     implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     implementation 'androidx.test:rules:1.2.0'
     implementation 'androidx.test:runner:1.2.0'
-    implementation project(path: ':testcore')
 }
 
 sourceCompatibility = "8"

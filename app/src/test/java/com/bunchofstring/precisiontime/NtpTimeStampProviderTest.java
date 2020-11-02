@@ -8,7 +8,6 @@ import static org.junit.Assert.*;
 public class NtpTimeStampProviderTest {
 
     private static final long DEFAULT_TIME_VALUE = -1;
-    private static final String NEW_SOURCE = "NEW_SOURCE_FAKE";
     private NtpTimestampProvider ntp = new NtpTimestampProvider(DEFAULT_TIME_VALUE);
 
     @Test

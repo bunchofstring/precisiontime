@@ -1,0 +1,135 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
+    signingConfigs {
+        debugConfig {
+            storeFile file('../../signal/debug.keystore')
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storePassword 'android'
+        }
+    }
+    defaultConfig {
+        multiDexEnabled true
+        minSdkVersion 28
+        targetSdkVersion 28
+        versionCode 8
+        versionName "1.0"
+        signingConfig signingConfigs.debugConfig
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments 'android.testInstrumentationRunnerArguments.captureDeviceDir': '/sdcard/Pictures/Captures'
+        testOptions {
+            execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            signingConfig signingConfigs.debugConfig
+            matchingFallbacks = ['debug','release']
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+}
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter()
+}
+
+ext.androidSupportVersion = '28.0.0'
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'com.google.android.gms:play-services-location:9.2.1'
+    androidTestImplementation project(path: ':testcore')
+    androidTestImplementation project(path: ':capture')
+
+    androidTestUtil 'androidx.test:orchestrator:1.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test:core:1.2.0'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.1'
+    }
+}
+
+/*tasks.withType(Test) {
+    testLogging {
+        events "passed", "skipped", "failed" //, "standardOut", "standardError"
+
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+
+        showStandardStreams = false
+    }
+    afterTest { desc, result ->
+        println "Foo Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+}*/
+
+ext.getCaptureDeviceDir = { ->
+    def defaultCaptureDeviceDir = "/sdcard/Pictures/Captures";
+    return project.properties["android.testInstrumentationRunnerArguments.captureDeviceDir"] ?: defaultCaptureDeviceDir
+}
+
+def transferCapturesTask = task('transferCaptures', type: Exec, group: 'reporting') {
+    //TODO: Run conditionally based only if any screenshot or video is captured (e.g. Capture.screenshot(...)) - NOT only if a test failed
+    /*onlyIf {
+        connectedDebugAndroidTest.getTestFailed()
+    }*/
+    def sourceDirectory = getCaptureDeviceDir()
+    def destinationDirectory = getReportsDir().toString()+"/androidTests/connected"
+    doFirst {
+        println "Transferring captures..."
+        println "from device at " + sourceDirectory
+        println "to PC at " + destinationDirectory
+    }
+    executable "${android.getAdbExecutable().toString()}"
+    args 'pull', sourceDirectory, destinationDirectory
+    ignoreExitValue true
+}
+
+//TODO: Make this safe in case captureDeviceDir config is not supplied
+def cleanUpCapturesTask = task('cleanUpCaptures', type: Exec, group: 'reporting') {
+    /*onlyIf {
+        connectedDebugAndroidTest.getTestFailed()
+    }*/
+    def sourceDirectory = getCaptureDeviceDir()
+    doFirst {
+        println "Cleaning up captures from device at " + sourceDirectory
+    }
+    executable "${android.getAdbExecutable().toString()}"
+    args 'shell', 'rm', '-r', sourceDirectory
+    ignoreExitValue true
+}
+
+gradle.projectsEvaluated {
+    connectedDebugAndroidTest.finalizedBy transferCapturesTask
+    transferCapturesTask.finalizedBy cleanUpCapturesTask
+}
