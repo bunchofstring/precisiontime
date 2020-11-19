@@ -22,11 +22,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    private final static long UNDEFINED_TIMESTAMP = -1L;
-    private final static String UNDEFINED_TIME_LABEL = "?";
-    private final static String INVISIBLE_LABEL = "";
     private final static String KEY_HOST = "KEY_HOST";
-    private final static TimestampProvider timestampProvider = new NtpTimestampProvider(UNDEFINED_TIMESTAMP);
+
+    private final static TimestampProvider timestampProvider = new NtpTimestampProvider();
+    private final static LabelMaker labelMaker = new LabelMaker();
 
     private final ValueAnimator animator = new ValueAnimator();
 
@@ -101,37 +100,30 @@ public class MainActivity extends AppCompatActivity {
         previousFrameTimestamp = value;
 
         //Update
-        frameSpacingLabel.setText(getIntervalLabel(diff, locale));
-        currentTimeLabel.setText(getTimeLabel(timestampProvider.getTimestamp(), locale));
-        syncCountdownLabel.setText(getSecondsToSyncLabel(timestampProvider.getSecondsToSync(), locale));
-        timeSinceSyncLabel.setText(getTimeSinceSyncLabel(timestampProvider.getSecondsSinceLastSync(), locale));
+        if(diff > 0) {
+            frameSpacingLabel.setText(labelMaker.getIntervalLabel(diff, locale));
+        }else{
+            frameSpacingLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+        }
+        try {
+            currentTimeLabel.setText(labelMaker.getTimeLabel(timestampProvider.getTimestamp(), locale));
+        } catch (UnreliableTimeException e) {
+            currentTimeLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+        }
+        try {
+            syncCountdownLabel.setText(labelMaker.getSecondsToSyncLabel(timestampProvider.getSecondsToSync(), locale));
+        } catch (UnreliableTimeException e) {
+            syncCountdownLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+        }
+        try {
+            timeSinceSyncLabel.setText(labelMaker.getTimeSinceSyncLabel(timestampProvider.getSecondsSinceLastSync(), locale));
+        } catch (UnreliableTimeException e) {
+            timeSinceSyncLabel.setText(LabelMaker.INVISIBLE_LABEL);
+        }
 
         //Show or hide
         syncCountdownLabel.setVisibility((isTimeSyncing) ? View.GONE : View.VISIBLE);
         syncStatus.setVisibility((isTimeSyncing) ? View.VISIBLE : View.GONE);
-    }
-
-    private String getIntervalLabel(long diff, Locale locale){
-        if(diff == 0) return UNDEFINED_TIME_LABEL;
-        return String.format(locale, "%d ms frame interval", diff);
-    }
-
-    private String getTimeLabel(long timeInMilliseconds, Locale locale) {
-        if(timeInMilliseconds == UNDEFINED_TIMESTAMP) return UNDEFINED_TIME_LABEL;
-        Date date = new Date(timeInMilliseconds);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss.SSS z", locale);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return simpleDateFormat.format(date);
-    }
-
-    private String getSecondsToSyncLabel(long countdownInSeconds, Locale locale) {
-        if (countdownInSeconds == UNDEFINED_TIMESTAMP) return UNDEFINED_TIME_LABEL;
-        return String.format(locale, "Next sync in %d s", countdownInSeconds);
-    }
-
-    private String getTimeSinceSyncLabel(long seconds, Locale locale) {
-        if (seconds == UNDEFINED_TIMESTAMP) return INVISIBLE_LABEL;
-        return String.format(locale, "Synced %d s ago", seconds);
     }
 
     private boolean onKey(View v, int keyCode, KeyEvent event) {

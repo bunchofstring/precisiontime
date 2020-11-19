@@ -1,20 +1,19 @@
 package com.bunchofstring.test.capture;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-
-import androidx.annotation.NonNull;
-
 import com.bunchofstring.test.CoreUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Capture {
 
     private static final Logger LOGGER = Logger.getLogger(Capture.class.getSimpleName());
+    private static final String VIDEO_SUFFIX = ".mp4";
+    private static final String IMAGE_SUFFIX = ".png";
 
     public static boolean screenshot(final String fileName){
         return screenshot("./", fileName);
@@ -51,32 +50,13 @@ public class Capture {
         }
     }
 
-    private static RecordingInProgress doScreenrecord(final File dir, final String fileName){
-        final File file = new File(dir, fileName);
-        final RecordingInProgress r = new RecordingInProgress(file);
-        enqueue(() -> {
-            try {
-                r.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        return r;
+    private static RecordingInProgress doScreenrecord(final File dir, final String fileName) throws IOException {
+        final Path path = Files.createTempFile(dir.toPath(), fileName, VIDEO_SUFFIX);
+        return new RecordingInProgress(path.toFile());
     }
 
-    private static final HandlerThread mHandlerThread = new HandlerThread(Capture.class.getSimpleName());
-    private static boolean isRunning;
-
-    public static void enqueue(@NonNull Runnable r){
-        if(!isRunning){
-            mHandlerThread.start();
-            isRunning = true;
-        }
-        new Handler(mHandlerThread.getLooper()).post(r);
-    }
-
-    private static void doScreenshot(final File dir, final String fileName) {
-        final File file = new File(dir, fileName);
+    private static void doScreenshot(final File dir, final String fileName) throws IOException {
+        final File file = File.createTempFile(fileName, IMAGE_SUFFIX, dir);
         if (CoreUtils.getDevice().takeScreenshot(file)) {
             LOGGER.log(Level.INFO, "Captured screenshot at " + file.getAbsolutePath());
         } else {

@@ -7,22 +7,36 @@ import static org.junit.Assert.*;
 
 public class NtpTimeStampProviderTest {
 
-    private static final long DEFAULT_TIME_VALUE = -1;
-    private NtpTimestampProvider ntp = new NtpTimestampProvider(DEFAULT_TIME_VALUE);
+    private NtpTimestampProvider ntp = new NtpTimestampProvider();
 
     @Test
     public void defaultTimestamp() {
-        assertEquals(DEFAULT_TIME_VALUE, ntp.getTimestamp());
+        try {
+            ntp.getTimestamp();
+            fail("Returned an unreliable value for timestamp");
+        } catch (UnreliableTimeException e) {
+            //No implementation
+        }
     }
 
     @Test
     public void defaultSecondsSinceLastSync() {
-        assertEquals(DEFAULT_TIME_VALUE, ntp.getSecondsSinceLastSync());
+        try {
+            ntp.getSecondsSinceLastSync();
+            fail("Returned an unreliable value for seconds since last sync");
+        } catch (UnreliableTimeException e) {
+            //No implementation
+        }
     }
 
     @Test
     public void defaultSecondsToSync() {
-        assertEquals(DEFAULT_TIME_VALUE, ntp.getSecondsToSync());
+        try {
+            ntp.getSecondsToSync();
+            fail("Returned an unreliable value for seconds to sync");
+        } catch (UnreliableTimeException e) {
+            //No implementation
+        }
     }
 
     @Test

@@ -19,4 +19,9 @@ public class AppPageObject {
         LOGGER.info("talldave - kill");
         CoreUtils.killApp(TestConfig.PACKAGE_NAME);
     }
+
+    public static void reset() throws IOException {
+        LOGGER.info("talldave - reset");
+        CoreUtils.resetApp(TestConfig.PACKAGE_NAME);
+    }
 }

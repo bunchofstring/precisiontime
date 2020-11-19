@@ -24,8 +24,8 @@ public class ColdStartTest {
     public static TestRule classRule = new FrameworkSpeedRule();
 
     @Rule
-    public RuleChain testRuleChain = RuleChain
-            .outerRule(new FailureVideoTestWatcher())
+    public RuleChain testRuleChain = RuleChain.emptyRuleChain()
+            .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new ColdStartTestRule(TestConfig.PACKAGE_NAME))
             .around(new AppLifecycleTestRule(TestConfig.PACKAGE_NAME))

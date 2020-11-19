@@ -24,22 +24,12 @@ public class NtpTimestampProvider implements TimestampProvider {
     private static final int SYNC_INTERVAL_MS = 1000 * 60 * 10;
 
     private final GregorianCalendar currentTime = new GregorianCalendar();
-    private final long defaultTimeValue;
 
     private String host = DEFAULT_NTP_HOST;
     private boolean isStarted;
     private boolean isSyncing;
     private Date lastSyncTimestamp;
     private Disposable periodicSync;
-
-    public NtpTimestampProvider(long defaultTimeValue){
-        this.defaultTimeValue = defaultTimeValue;
-    }
-
-    @SuppressWarnings("unused")
-    private NtpTimestampProvider() throws InstantiationException {
-        throw new InstantiationException();
-    }
 
     @Override
     public void start() {
@@ -58,35 +48,26 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     @Override
-    public long getTimestamp(){
-        if(isReliable()){
-            currentTime.setTime(TrueTimeRx.now());
-            return currentTime.getTimeInMillis();
-        }else{
-            return defaultTimeValue;
-        }
+    public long getTimestamp() throws UnreliableTimeException {
+        assertReliable();
+        currentTime.setTime(TrueTimeRx.now());
+        return currentTime.getTimeInMillis();
     }
 
     @Override
-    public long getSecondsToSync(){
-        if(isReliable()){
-            return millisecondsToSeconds(getMillisecondsToSync());
-        }else{
-            return defaultTimeValue;
-        }
+    public long getSecondsToSync() throws UnreliableTimeException {
+        assertReliable();
+        return millisecondsToSeconds(getMillisecondsToSync());
     }
 
     @Override
-    public long getSecondsSinceLastSync(){
+    public long getSecondsSinceLastSync() throws UnreliableTimeException {
         getTimestamp();
-        if(isReliable()){
-            GregorianCalendar cal = new GregorianCalendar();
-            cal.setTime(lastSyncTimestamp);
-            long diff = (currentTime.getTimeInMillis() - cal.getTimeInMillis());
-            return millisecondsToSeconds(diff);
-        }else{
-            return defaultTimeValue;
-        }
+        assertReliable();
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(lastSyncTimestamp);
+        long diff = (currentTime.getTimeInMillis() - cal.getTimeInMillis());
+        return millisecondsToSeconds(diff);
     }
 
     @Override
@@ -115,6 +96,10 @@ public class NtpTimestampProvider implements TimestampProvider {
         return host;
     }
 
+    private void assertReliable() throws UnreliableTimeException {
+        if(!isReliable()) throw new UnreliableTimeException();
+    }
+
     private boolean isReliable(){
         if(lastSyncTimestamp == null || !TrueTimeRx.isInitialized()){
             return false;
@@ -131,6 +116,16 @@ public class NtpTimestampProvider implements TimestampProvider {
         isSyncing = false;
         lastSyncTimestamp = date;
         currentTime.setTime(date);
+
+        //App instances will attempt to sync at roughly the same time. For a set of different
+        //devices, this helps minimize the total error due to drift.
+        stopPeriodicSync();
+        try {
+            long orchestrated = getMillisecondsToSync();
+            periodicSync = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(() -> sync());
+        } catch (UnreliableTimeException e) {
+            e.printStackTrace();
+        }
     }
 
     private void onError(Throwable t){
@@ -139,7 +134,7 @@ public class NtpTimestampProvider implements TimestampProvider {
         t.printStackTrace();
     }
 
-    private long getMillisecondsToSync(){
+    private long getMillisecondsToSync() throws UnreliableTimeException {
         getTimestamp();
         int minute = currentTime.get(GregorianCalendar.MINUTE);
         int second = currentTime.get(GregorianCalendar.SECOND);
@@ -179,7 +174,6 @@ public class NtpTimestampProvider implements TimestampProvider {
                             NtpTimestampProvider.this.onError(e);
                         }
                     });
-                    //.subscribe(date -> onSync(date),throwable -> onError(throwable));
         }else{
             //noinspection ResultOfMethodCallIgnored
             tt.initializeRx(host)
@@ -197,14 +191,7 @@ public class NtpTimestampProvider implements TimestampProvider {
                             NtpTimestampProvider.this.onError(e);
                         }
                     });
-                    //.subscribe(date -> onSync(date), throwable -> onError(throwable));
         }
-
-        //App instances will attempt to sync at roughly the same time. For a set of different
-        //devices, this helps minimize the total error due to drift.
-        stopPeriodicSync();
-        long orchestrated = getMillisecondsToSync();
-        periodicSync = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(() -> sync());
     }
 
     private void stopPeriodicSync(){

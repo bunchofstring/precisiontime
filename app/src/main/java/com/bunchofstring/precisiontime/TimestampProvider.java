@@ -10,8 +10,8 @@ interface TimestampProvider {
     void setSource(@NonNull String host);
 
     String getSource();
-    long getTimestamp();
-    long getSecondsToSync();
-    long getSecondsSinceLastSync();
+    long getTimestamp() throws UnreliableTimeException;
+    long getSecondsToSync() throws UnreliableTimeException;
+    long getSecondsSinceLastSync() throws UnreliableTimeException;
     boolean isSyncing();
 }

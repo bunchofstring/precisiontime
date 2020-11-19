@@ -19,18 +19,12 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-//./gradlew clean :apptest:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.captureDeviceDir=/sdcard/Pictures/Captures
-
 public class CoreUiTest {
-
-    private static final Logger LOGGER = Logger.getLogger(CoreUiTest.class.getSimpleName());
 
     private final static String NEW_NTP_HOST_0 = "0.pool.ntp.org";
     private final static String NEW_NTP_HOST_1 = "1.pool.ntp.org";
@@ -41,28 +35,20 @@ public class CoreUiTest {
             .outerRule(new FrameworkSpeedRule())
             .around(new TouchMarkupRule())
             .around(new LifecycleTestRule() {
-
-                private String previousNtpServer;
-
                 @Override
-                public void before() {
-                    LOGGER.log(Level.INFO, "talldave - rule-based beforeclass");
-                    AppPageObject.launch();
-                    previousNtpServer = MainPageObject.getNtpHostField().getText();
+                public void before() throws Throwable {
+                    AppPageObject.reset();
                 }
 
                 @Override
-                public void after() throws Throwable {
-                    LOGGER.log(Level.INFO,"talldave - rule-based afterclass");
-                    AppPageObject.launch();
-                    MainPageObject.enterNtpHost(previousNtpServer);
-                    AppPageObject.kill();
+                public void after() {
+                    //No implementation
                 }
             });
 
     @Rule
-    public RuleChain testRuleChain = RuleChain
-            .outerRule(new FailureVideoTestWatcher())
+    public RuleChain testRuleChain = RuleChain.emptyRuleChain()
+            .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new AppLifecycleTestRule(TestConfig.PACKAGE_NAME))
             .around(new FailureScreenshotTestWatcher());

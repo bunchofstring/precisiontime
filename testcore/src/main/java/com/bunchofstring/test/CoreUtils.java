@@ -21,8 +21,9 @@ public class CoreUtils {
     private final static long LONG_TIMEOUT = 1000 * 60 * 3L;
 
     public static String executeShellCommand(final String cmd) throws IOException {
-        String result = getDevice().executeShellCommand(cmd);
-        LOGGER.log(Level.INFO,"Result of '"+cmd+"' is\n"+result);
+        final String trimmedCmd = cmd.trim();
+        final String result = getDevice().executeShellCommand(trimmedCmd);
+        LOGGER.log(Level.INFO,"Result of '"+trimmedCmd+"' is\n"+result);
         return result;
     }
 
@@ -41,6 +42,11 @@ public class CoreUtils {
 
     public static void killApp(final String packageName) throws IOException {
         executeShellCommand("am force-stop " + packageName);
+        getDevice().wait(Until.gone(By.pkg(packageName)), SHORT_TIMEOUT);
+    }
+
+    public static void resetApp(final String packageName) throws IOException {
+        executeShellCommand("pm clear " + packageName);
         getDevice().wait(Until.gone(By.pkg(packageName)), SHORT_TIMEOUT);
     }
 

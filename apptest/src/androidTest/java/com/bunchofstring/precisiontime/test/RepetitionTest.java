@@ -1,6 +1,7 @@
 package com.bunchofstring.precisiontime.test;
 
 import com.bunchofstring.test.FrameworkSpeedRule;
+import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
 
@@ -13,15 +14,23 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
 
+import static junit.framework.Assert.fail;
+
 public class RepetitionTest {
 
     @ClassRule
     public static TestRule classRule = new FrameworkSpeedRule();
 
     @Rule
-    public RuleChain testRuleChain = RuleChain
-            .outerRule(new FailureVideoTestWatcher())
+    public RuleChain testRuleChain = RuleChain.emptyRuleChain()
+            .around(new FailureVideoTestWatcher())
+            .around(new ClapperboardTestWatcher())
             .around(new FailureScreenshotTestWatcher());
+
+    @Test
+    public void test_Failure(){
+        fail();
+    }
 
     @Test
     public void test_Repetition() throws Throwable {
