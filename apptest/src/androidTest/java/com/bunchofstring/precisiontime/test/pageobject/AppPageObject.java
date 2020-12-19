@@ -11,17 +11,14 @@ public class AppPageObject {
     private static final Logger LOGGER = Logger.getLogger(AppPageObject.class.getSimpleName());
 
     public static void launch(){
-        LOGGER.info("talldave - launch");
         CoreUtils.launchApp(TestConfig.PACKAGE_NAME);
     }
 
     public static void kill() throws IOException {
-        LOGGER.info("talldave - kill");
         CoreUtils.killApp(TestConfig.PACKAGE_NAME);
     }
 
     public static void reset() throws IOException {
-        LOGGER.info("talldave - reset");
         CoreUtils.resetApp(TestConfig.PACKAGE_NAME);
     }
 }

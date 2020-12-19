@@ -1,13 +1,12 @@
 package com.bunchofstring.precisiontime;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class NtpTimeStampProviderTest {
 
-    private NtpTimestampProvider ntp = new NtpTimestampProvider();
+    private final NtpTimestampProvider ntp = new NtpTimestampProvider();
 
     @Test
     public void defaultTimestamp() {

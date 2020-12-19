@@ -33,11 +33,12 @@ public class Capture {
         }
     }
 
-    public static RecordingInProgress newVideoRecording(final String fileName) {
+
+    public static RecordingInProgress newVideoRecording(final String fileName) throws CaptureException {
         return newVideoRecording("./", fileName);
     }
 
-    public static RecordingInProgress newVideoRecording(final String subDirName, final String fileName){
+    public static RecordingInProgress newVideoRecording(final String subDirName, final String fileName) throws CaptureException {
         LOGGER.log(Level.INFO, "Attempting video recording...");
         final File dir = DeviceStoragePreparer.getDeviceSubdir(subDirName);
 
@@ -46,7 +47,16 @@ public class Capture {
             DeviceStoragePreparer.ensureDeviceDirExists(dir);
             return doScreenrecord(dir, fileName);
         } catch (Throwable throwable) {
-            throw new RuntimeException("Unable to capture video recording", throwable);
+            /*
+            Not recoverable during during test execution, but a caller should anticipate this
+            situation - because it directly affects the effectiveness of the tests. A runtime error
+            in Capture should not affect the test - unless the caller wants it to.
+            1. Force the caller to handle the Throwable. Test can decide what to do - in the moment :D
+            2. Log the Throwable and swallow it. Test continues unaware :)
+            3. Throw an unchecked exception. Test fails. Test can decide what to do - in the moment -
+               but that would require catching an unchecked exception - which would be a bad code smell :|
+            */
+            throw new CaptureException("Unable to capture video recording", throwable);
         }
     }
 

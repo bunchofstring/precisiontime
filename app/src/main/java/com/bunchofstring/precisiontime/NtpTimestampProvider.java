@@ -163,13 +163,13 @@ public class NtpTimestampProvider implements TimestampProvider {
                     //Method reference does not work for these subscribers
                     .subscribeWith(new DisposableSingleObserver<Date>() {
                         @Override
-                        public void onSuccess(Date date) {
+                        public void onSuccess(@NonNull Date date) {
                             Log.d(TAG, "Success initialized TrueTime :" + date.toString());
                             NtpTimestampProvider.this.onSync(date);
                         }
 
                         @Override
-                        public void onError(Throwable e) {
+                        public void onError(@NonNull Throwable e) {
                             Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
                             NtpTimestampProvider.this.onError(e);
                         }
@@ -180,13 +180,13 @@ public class NtpTimestampProvider implements TimestampProvider {
                     .subscribeOn(Schedulers.io())
                     .subscribeWith(new DisposableSingleObserver<Date>() {
                         @Override
-                        public void onSuccess(Date date) {
+                        public void onSuccess(@NonNull Date date) {
                             Log.d(TAG, "Success initialized TrueTime :" + date.toString());
                             NtpTimestampProvider.this.onSync(date);
                         }
 
                         @Override
-                        public void onError(Throwable e) {
+                        public void onError(@NonNull Throwable e) {
                             Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
                             NtpTimestampProvider.this.onError(e);
                         }

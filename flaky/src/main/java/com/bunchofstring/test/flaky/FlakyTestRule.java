@@ -1,5 +1,7 @@
 package com.bunchofstring.test.flaky;
 
+import androidx.annotation.NonNull;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -48,8 +50,8 @@ import org.junit.runners.model.Statement;
 
 public class FlakyTestRule implements TestRule {
 
-    @Override
-    public Statement apply(Statement base, Description description) {
+    @Override @NonNull
+    public Statement apply(@NonNull Statement base, @NonNull Description description) {
         Flaky flaky = description.getAnnotation(Flaky.class);
         if (flaky == null) {
             return base;

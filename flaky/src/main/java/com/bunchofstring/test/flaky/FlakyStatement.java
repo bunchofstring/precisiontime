@@ -20,7 +20,7 @@ class FlakyStatement extends Statement {
     private final boolean itemizeSummary;
 
     private final StringJoiner results = new StringJoiner("\n");
-    private Throwable summaryException = new Throwable("Too flakey");
+    private final Throwable summaryException = new Throwable("Too flaky");
 
     FlakyStatement(final Statement base, final Description description, final Flaky flaky) {
         this.base = base;

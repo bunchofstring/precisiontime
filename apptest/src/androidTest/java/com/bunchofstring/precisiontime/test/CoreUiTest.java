@@ -12,6 +12,8 @@ import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
+import com.bunchofstring.test.flaky.Flaky;
+import com.bunchofstring.test.flaky.FlakyTestRule;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -48,11 +50,13 @@ public class CoreUiTest {
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()
+            .around(new FlakyTestRule())
             .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new AppLifecycleTestRule(TestConfig.PACKAGE_NAME))
             .around(new FailureScreenshotTestWatcher());
 
+    @Flaky
     @Test
     public void test_WhenLaunch_ThenDisplayTime() {
         //Then
@@ -75,6 +79,7 @@ public class CoreUiTest {
         assertTrue("NTP host field not focused", ntpHostField.get().isFocused());
     }
 
+    @Flaky(traceAllFailures = true)
     @Test
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given

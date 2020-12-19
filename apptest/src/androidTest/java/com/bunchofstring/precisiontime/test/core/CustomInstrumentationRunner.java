@@ -12,16 +12,6 @@ public class CustomInstrumentationRunner extends AndroidJUnitRunner {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
     public void finish(int resultCode, Bundle results) {
         System.out.println("talldave - instrumentationrunner-based finish "+results.toString());
         //NTS: Original intent was to make sure the test had time to clean up before the target app is uninstalled.

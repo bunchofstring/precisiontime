@@ -3,7 +3,6 @@ package com.bunchofstring.test.capture;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

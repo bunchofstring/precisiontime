@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 public class IntegratedUnitTest {
 
     private static final String NEW_SOURCE = "NEW_SOURCE_FAKE";
-    private NtpTimestampProvider ntp = new NtpTimestampProvider(-1L);
+    private final NtpTimestampProvider ntp = new NtpTimestampProvider();
     private final String previousSource = ntp.getSource();
 
     @Rule

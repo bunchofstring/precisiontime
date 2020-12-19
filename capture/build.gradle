@@ -14,8 +14,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.test:core:1.2.0'
     implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    implementation 'androidx.test:core:1.2.0'
     implementation 'androidx.test:rules:1.2.0'
     implementation 'androidx.test:runner:1.2.0'
     implementation project(path: ':testcore')

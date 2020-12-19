@@ -16,7 +16,6 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 
 public class ColdStartTest {
 

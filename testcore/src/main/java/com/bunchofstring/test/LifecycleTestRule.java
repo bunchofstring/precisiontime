@@ -1,5 +1,7 @@
 package com.bunchofstring.test;
 
+import androidx.annotation.NonNull;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -17,8 +19,8 @@ abstract public class LifecycleTestRule implements TestRule {
 
     public abstract void after() throws Throwable;
 
-    @Override
-    public Statement apply(Statement base, Description description) {
+    @Override @NonNull
+    public Statement apply(@NonNull Statement base, @NonNull Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
@@ -64,7 +66,7 @@ abstract public class LifecycleTestRule implements TestRule {
         try {
             LifecycleTestRule.this.after();
         } catch (Throwable t) {
-            final RuntimeException rte = new RuntimeException("Problem cleaning up (i.e. postcondition not satisfied)", t);
+            final RuntimeException rte = new RuntimeException("Problem cleaning up (i.e. post-condition not satisfied)", t);
             if(isPreconditionSatisfied) {
                 throw rte;
             }else{

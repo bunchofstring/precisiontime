@@ -1,5 +1,7 @@
 package com.bunchofstring.test;
 
+import androidx.annotation.NonNull;
+
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
@@ -32,7 +34,7 @@ abstract public class ClassLifecycleTestRule extends LifecycleTestRule {
 
     public static class ClassLifecycleTestRuleHelper extends LifecycleTestRule{
 
-        private ClassLifecycleTestRule classLifecycleTestRule;
+        private final ClassLifecycleTestRule classLifecycleTestRule;
 
         public ClassLifecycleTestRuleHelper(ClassLifecycleTestRule cltr){
             classLifecycleTestRule = cltr;
@@ -43,7 +45,7 @@ abstract public class ClassLifecycleTestRule extends LifecycleTestRule {
             throw new InstantiationException();
         }
 
-        @Override
+        @Override @NonNull
         public Statement apply(Statement base, Description description) {
             return new Statement() {
                 @Override
@@ -67,7 +69,7 @@ abstract public class ClassLifecycleTestRule extends LifecycleTestRule {
         }
     }
 
-    @Override
+    @Override @NonNull
     public Statement apply(Statement base, Description description) {
         return new LifecycleTestRule() {
             @Override

@@ -5,7 +5,9 @@ import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -13,8 +15,6 @@ import org.junit.rules.TestRule;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
-
-import static junit.framework.Assert.fail;
 
 public class RepetitionTest {
 
@@ -29,7 +29,13 @@ public class RepetitionTest {
 
     @Test
     public void test_Failure(){
-        fail();
+//TODO: Uncomment and make sure the video capture still works
+/*        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        Assert.fail("Intentional failure - as an example");
     }
 
     @Test
