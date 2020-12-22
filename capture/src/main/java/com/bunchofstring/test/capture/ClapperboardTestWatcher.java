@@ -18,7 +18,7 @@ public class ClapperboardTestWatcher extends TestWatcher {
 
     private static final Logger LOGGER = Logger.getLogger(ClapperboardTestWatcher.class.getSimpleName());
 
-    private static final int ASSUMED_VISIBILITY_DURATION = 0;//3000; //3 seconds
+    private static final int ASSUMED_VISIBILITY_DURATION = 2000; //2 seconds
 
     @Override
     protected void starting(Description description) {

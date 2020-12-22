@@ -34,14 +34,15 @@ public class RecordingInProgress {
     }
 
     boolean cancellationPending = false;
-    Future<?> mScreenRecorderProcess;
 
     public void finish(){
         mQueue.submit(() -> {
             LOGGER.log(Level.INFO, "Finishing screen recording at " + file);
             killScreenRecorderProcesses();
+/*if(!cancellationPending) {
+    gracefulEnd();
+}*/
         });
-        mScreenRecorderProcess.cancel(true);
 
         if(!cancellationPending) {
             gracefulEnd();
@@ -61,16 +62,14 @@ public class RecordingInProgress {
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Could not clean up the canceled screen recording at " + file, e);
             }
+//gracefulEnd();
         });
         gracefulEnd();
     }
 
     private void gracefulEnd(){
+        LOGGER.log(Level.INFO, "Graceful end " + file);
         mQueue.shutdown();
-        awaitCompletion();
-    }
-
-    private void awaitCompletion(){
         try {
             mQueue.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -92,26 +91,28 @@ public class RecordingInProgress {
             if(pid != null && !pid.isEmpty()){
                 pid = pid.trim();
                 LOGGER.log(Level.INFO, "Killing screen video recording pid " + pid + " from pid " + Process.myPid());
-try {
-    CoreUtils.executeShellCommand(String.format("kill -2 %s", pid));
-} catch (IOException e) {
-    e.printStackTrace();
-}
-//InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(String.format("kill -2 %s", pid));
+                try {
+                    CoreUtils.executeShellCommand(String.format("kill -2 %s", pid));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 LOGGER.log(Level.INFO, "Killed screen video recording pid " + pid);
             }
         }
     }
 
     private void start(){
-        mScreenRecorderProcess = mQueue.submit(() -> {
+        mQueue.submit(() -> {
             try{
                 final String filePath = file.getCanonicalPath();
                 final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath);
                 LOGGER.log(Level.INFO, String.format("Starting screen recording to %s", filePath));
-                ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(screenRecordCmd);
+//CoreUtils.executeShellCommand(screenRecordCmd);
+ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(screenRecordCmd);
 FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
 //fis.close();
+                LOGGER.log(Level.INFO, String.format("Started screen recording to %s", filePath));
+
             } catch (Throwable t) {
                 throw new RuntimeException("Screen video capture operation failed", t);
             }

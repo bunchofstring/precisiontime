@@ -14,7 +14,8 @@ public class FailureVideoTestWatcher extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(FailureVideoTestWatcher.class.getSimpleName());
 
     private static final int ASSUMED_SCREENRECORD_LIMIT = 3 * 60 * 1000; //3 minutes
-    private static final int DEFAULT_PADDING = 5000;//500; //Half of a second
+    private static final int DEFAULT_PADDING = 500; //Half a second
+    private static final int PADDING_OFFSET = 2000; //1.5 seconds
 
     private final int mPadding;
     private RecordingInProgress mRecordingInProgress;
@@ -64,16 +65,16 @@ public class FailureVideoTestWatcher extends TestWatcher {
         if(!mIsDeactivated){
             LOGGER.log(Level.INFO, "Video finishing for "+description);
             try {
-                Thread.sleep(mPadding);
+                Thread.sleep(PADDING_OFFSET + mPadding);
             } catch (InterruptedException e1) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e1);
             }
             mRecordingInProgress.finish();
-            try {
-                Thread.sleep(mPadding);
+            /*try {
+                Thread.sleep(PADDING_OFFSET);
             } catch (InterruptedException e1) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e1);
-            }
+            }*/
         };
         super.failed(e, description);
     }
