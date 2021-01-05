@@ -5,6 +5,8 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
+import java.util.logging.Level;
+
 public class FailureListener extends RunListener {
 
     @Override

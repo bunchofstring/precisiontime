@@ -61,12 +61,12 @@ public class Capture {
     }
 
     private static RecordingInProgress doScreenrecord(final File dir, final String fileName) throws IOException {
-        final Path path = Files.createTempFile(dir.toPath(), fileName, VIDEO_SUFFIX);
+        final Path path = Files.createTempFile(dir.toPath(), fileName + "_", VIDEO_SUFFIX);
         return new RecordingInProgress(path.toFile());
     }
 
     private static void doScreenshot(final File dir, final String fileName) throws IOException {
-        final File file = File.createTempFile(fileName, IMAGE_SUFFIX, dir);
+        final File file = File.createTempFile(fileName + "_", IMAGE_SUFFIX, dir);
         if (CoreUtils.getDevice().takeScreenshot(file)) {
             LOGGER.log(Level.INFO, "Captured screenshot at " + file.getAbsolutePath());
         } else {

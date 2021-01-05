@@ -19,6 +19,7 @@ public class ClapperboardTestWatcher extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(ClapperboardTestWatcher.class.getSimpleName());
 
     private static final int ASSUMED_VISIBILITY_DURATION = 2000; //2 seconds
+    private static final int ASSUMED_VISIBILITY_DELAY = 500; //Half a second
 
     @Override
     protected void starting(Description description) {
@@ -27,11 +28,12 @@ public class ClapperboardTestWatcher extends TestWatcher {
 
     private void toast(final String message) {
         new Handler(Looper.getMainLooper()).post(() -> {
-            Context context =  InstrumentationRegistry.getInstrumentation().getTargetContext();
+            Context context =  InstrumentationRegistry.getInstrumentation().getContext();
             Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
         });
+
         try {
-            Thread.sleep(ASSUMED_VISIBILITY_DURATION);
+            Thread.sleep(ASSUMED_VISIBILITY_DELAY + ASSUMED_VISIBILITY_DURATION);
         } catch (InterruptedException e) {
             LOGGER.log(Level.WARNING, "Clapper was interrupted", e);
         }

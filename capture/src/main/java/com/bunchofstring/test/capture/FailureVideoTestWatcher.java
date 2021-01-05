@@ -14,12 +14,16 @@ public class FailureVideoTestWatcher extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(FailureVideoTestWatcher.class.getSimpleName());
 
     private static final int ASSUMED_SCREENRECORD_LIMIT = 3 * 60 * 1000; //3 minutes
-    private static final int DEFAULT_PADDING = 500; //Half a second
-    private static final int PADDING_OFFSET = 2000; //1.5 seconds
+    private static final int DEFAULT_PADDING = 2000; //Two seconds
 
     private final int mPadding;
     private RecordingInProgress mRecordingInProgress;
     private boolean mIsDeactivated;
+    private boolean mKeepSuccesses;
+
+    public FailureVideoTestWatcher() {
+        this(DEFAULT_PADDING);
+    }
 
     /**
      * Test Watcher to capture a screen recording (i.e. video) of test failures. Recording cannot
@@ -33,23 +37,23 @@ public class FailureVideoTestWatcher extends TestWatcher {
         if(acceptableRange.contains(padding)){
             mPadding = padding;
         }else{
-            mPadding = DEFAULT_PADDING;
+            mPadding = acceptableRange.getLower();
             LOGGER.log(Level.WARNING, String.format(Locale.getDefault(),
-                    "The specified padding %d is outside the acceptable range (%d - %d). Falling back to the default %d",
+                    "The specified padding %d is outside the acceptable range (%d - %d). Falling back to lowest acceptable padding",
                     padding,
                     acceptableRange.getLower(),
-                    acceptableRange.getUpper(),
-                    DEFAULT_PADDING));
+                    acceptableRange.getUpper()));
         }
     }
 
-    public FailureVideoTestWatcher() {
-        this(DEFAULT_PADDING);
+    public FailureVideoTestWatcher keepSuccesses(final boolean keep){
+        mKeepSuccesses = keep;
+        return this;
     }
 
     @Override
     protected void starting(Description description) {
-        LOGGER.log(Level.INFO, "Video recording starting for "+description);
+        LOGGER.log(Level.INFO, "Video recording starting for "+description+" padding="+mPadding);
         try {
             mRecordingInProgress = Capture.newVideoRecording(description.getClassName(), description.getMethodName());
             Thread.sleep(mPadding);
@@ -65,17 +69,12 @@ public class FailureVideoTestWatcher extends TestWatcher {
         if(!mIsDeactivated){
             LOGGER.log(Level.INFO, "Video finishing for "+description);
             try {
-                Thread.sleep(PADDING_OFFSET + mPadding);
+                Thread.sleep(mPadding);
             } catch (InterruptedException e1) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e1);
             }
             mRecordingInProgress.finish();
-            /*try {
-                Thread.sleep(PADDING_OFFSET);
-            } catch (InterruptedException e1) {
-                LOGGER.log(Level.WARNING, "Recording was interrupted", e1);
-            }*/
-        };
+        }
         super.failed(e, description);
     }
 
@@ -83,8 +82,17 @@ public class FailureVideoTestWatcher extends TestWatcher {
     protected void succeeded(Description description) {
         if(!mIsDeactivated){
             LOGGER.log(Level.INFO, "Video recording cancelling for "+description);
-            mRecordingInProgress.cancel();
-        };
+            if(!mKeepSuccesses) {
+                mRecordingInProgress.cancel();
+            }else{
+                try {
+                    Thread.sleep(mPadding);
+                } catch (InterruptedException e1) {
+                    LOGGER.log(Level.WARNING, "Recording was interrupted", e1);
+                }
+                mRecordingInProgress.finish();
+            }
+        }
         super.succeeded(description);
     }
 }

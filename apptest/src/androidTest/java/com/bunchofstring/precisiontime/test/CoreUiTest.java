@@ -33,8 +33,8 @@ public class CoreUiTest {
     private final static String NEW_NTP_HOST_2 = "2.pool.ntp.org";
 
     @ClassRule
-    public static RuleChain classRuleChain = RuleChain
-            .outerRule(new FrameworkSpeedRule())
+    public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
+            .around(new FrameworkSpeedRule())
             .around(new TouchMarkupRule())
             .around(new LifecycleTestRule() {
                 @Override
@@ -63,6 +63,21 @@ public class CoreUiTest {
         assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel());
     }
 
+    @Flaky(traceAllFailures = true)
+    @Test
+    public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
+        //Given
+        LifecycleTestRule.establishPrecondition(() -> {
+            assertNotNull("Time not displayed", MainPageObject.getTimeLabel());
+        });
+
+        //When
+        MainPageObject.enterNtpHost(NEW_NTP_HOST_0);
+
+        //Then
+        assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
+    }
+
     @Test
     public void test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus() {
         //Given
@@ -77,21 +92,6 @@ public class CoreUiTest {
 
         //Then
         assertTrue("NTP host field not focused", ntpHostField.get().isFocused());
-    }
-
-    @Flaky(traceAllFailures = true)
-    @Test
-    public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
-        //Given
-        LifecycleTestRule.establishPrecondition(() ->
-                assertNotNull("Time not displayed", MainPageObject.getTimeLabel())
-        );
-
-        //When
-        MainPageObject.enterNtpHost(NEW_NTP_HOST_0);
-
-        //Then
-        assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
     }
 
     @Test
