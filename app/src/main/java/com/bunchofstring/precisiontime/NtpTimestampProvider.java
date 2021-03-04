@@ -1,15 +1,12 @@
 package com.bunchofstring.precisiontime;
 
-import android.annotation.SuppressLint;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.instacart.library.truetime.TrueTimeRx;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
@@ -18,7 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class NtpTimestampProvider implements TimestampProvider {
 
-    private static final String TAG = NtpTimestampProvider.class.getSimpleName();
+    private static final Logger LOGGER = Logger.getLogger(NtpTimestampProvider.class.getSimpleName());
 
     private static final String DEFAULT_NTP_HOST = "pool.ntp.org";
     private static final int SYNC_INTERVAL_MS = 1000 * 60 * 10;
@@ -33,8 +30,10 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void start() {
-        Log.d(TAG, "start()");
-        if(!isStarted) {
+        if(isStarted) {
+            LOGGER.log(Level.WARNING, "Periodic sync is already started");
+        } else {
+            LOGGER.log(Level.INFO, "Starting periodic sync");
             isStarted = true;
             sync();
         }
@@ -42,7 +41,7 @@ public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void stop() {
-        Log.d(TAG, "stop()");
+        LOGGER.log(Level.INFO, "Stoping periodic sync");
         isStarted = false;
         stopPeriodicSync();
     }
@@ -76,8 +75,8 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     @Override
-    public void setSource(@NonNull String host) {
-        Log.d(TAG, "setSource(...) host="+host);
+    public void setSource(String host) {
+        LOGGER.log(Level.INFO,"Setting source to "+host);
         if(!host.equals(this.host)) {
             this.host = host;
             if(isStarted) {
@@ -112,8 +111,7 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     private void onSync(Date date){
-        Log.v(TAG, "onSync(...) date="+date);
-        isSyncing = false;
+        LOGGER.log(Level.INFO, "Synchronized current time "+date);
         lastSyncTimestamp = date;
         currentTime.setTime(date);
 
@@ -129,9 +127,8 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     private void onError(Throwable t){
-        Log.v(TAG, "onError(...) t="+t);
         isSyncing = false;
-        t.printStackTrace();
+        LOGGER.log(Level.SEVERE, "Problem fetching network time", t);
     }
 
     private long getMillisecondsToSync() throws UnreliableTimeException {
@@ -147,47 +144,45 @@ public class NtpTimestampProvider implements TimestampProvider {
         return (long)(((float) milliseconds) / 1000f);
     }
 
-    @SuppressLint("CheckResult")
     private void sync(){
-        TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(true);
-        boolean isInitialized = TrueTimeRx.isInitialized();
-        Log.d(TAG, "sync() host="+host+" isInitialized="+isInitialized);
-
         isSyncing = true;
 
+        TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(true);
+        boolean isInitialized = TrueTimeRx.isInitialized();
+
         if(isInitialized){
-            //noinspection ResultOfMethodCallIgnored
+            LOGGER.log(Level.INFO, "Resyncing with source "+host);
             tt.initializeNtp(host)
                     .map(longs -> TrueTimeRx.now())
                     .subscribeOn(Schedulers.io())
                     //Method reference does not work for these subscribers
                     .subscribeWith(new DisposableSingleObserver<Date>() {
                         @Override
-                        public void onSuccess(@NonNull Date date) {
-                            Log.d(TAG, "Success initialized TrueTime :" + date.toString());
+                        public void onSuccess(Date date) {
+                            //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
                             NtpTimestampProvider.this.onSync(date);
                         }
 
                         @Override
-                        public void onError(@NonNull Throwable e) {
-                            Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
+                        public void onError(Throwable e) {
+                            //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
                             NtpTimestampProvider.this.onError(e);
                         }
                     });
         }else{
-            //noinspection ResultOfMethodCallIgnored
+            LOGGER.log(Level.INFO, "Syncing with source "+host);
             tt.initializeRx(host)
                     .subscribeOn(Schedulers.io())
                     .subscribeWith(new DisposableSingleObserver<Date>() {
                         @Override
-                        public void onSuccess(@NonNull Date date) {
-                            Log.d(TAG, "Success initialized TrueTime :" + date.toString());
+                        public void onSuccess(Date date) {
+                            //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
                             NtpTimestampProvider.this.onSync(date);
                         }
 
                         @Override
-                        public void onError(@NonNull Throwable e) {
-                            Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
+                        public void onError(Throwable e) {
+                            //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
                             NtpTimestampProvider.this.onError(e);
                         }
                     });
@@ -195,6 +190,7 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     private void stopPeriodicSync(){
+        isSyncing = false;
         if(periodicSync != null){
             periodicSync.dispose();
         }

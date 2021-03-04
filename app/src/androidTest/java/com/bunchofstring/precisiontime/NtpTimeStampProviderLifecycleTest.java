@@ -1,4 +1,4 @@
-package com.bunchofstring.precisiontime.test;
+package com.bunchofstring.precisiontime;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -7,12 +7,15 @@ import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.bunchofstring.precisiontime.NtpTimestampProvider;
+import com.bunchofstring.test.LifecycleTestRule;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 
 import java.util.Date;
 import java.util.Map;
@@ -24,32 +27,37 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class IntegratedUnitTest {
+public class NtpTimeStampProviderLifecycleTest {
 
     private static final String NEW_SOURCE = "NEW_SOURCE_FAKE";
-    private final NtpTimestampProvider ntp = new NtpTimestampProvider();
-    private final String previousSource = ntp.getSource();
+    private NtpTimestampProvider ntp = new NtpTimestampProvider();
 
     @Rule
-    public FlakyTestRule flakyTestRule = new FlakyTestRule();
+    public TestRule rule = RuleChain.emptyRuleChain()
+        .around(new FlakyTestRule())
+        .around(new LifecycleTestRule() {
+            @Override
+            public void before() throws Throwable {
+                ntp = new NtpTimestampProvider();
+            }
+
+            @Override
+            public void after() throws Throwable {
+                ntp = null;
+            }
+        });
 
     @Test
-    public void test_GivenNewSource_WhenSetSource_ThenUpdateSource() {
-        try {
-            //Given
-            assertNotEquals(NEW_SOURCE, previousSource);
+    public void test_WhenStart_AttemptSync() {
+        ntp.start();
+        Assert.assertTrue("Start did not initiate network time sync", ntp.isSyncing());
+    }
 
-            //When
-            ntp.setSource(NEW_SOURCE);
-
-            //Then
-            assertEquals(NEW_SOURCE, ntp.getSource());
-        } finally {
-            //Cleanup
-            if(previousSource != null) {
-                ntp.setSource(previousSource);
-            }
-        }
+    @Test
+    public void test_CanStopPeriodicSync() {
+        ntp.start();
+        ntp.stop();
+        Assert.assertFalse("Could not stop periodic network time synchronization", ntp.isSyncing());
     }
 
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
@@ -74,7 +82,6 @@ public class IntegratedUnitTest {
         long startTime = new Date().getTime();
         Debug.MemoryInfo mi = new Debug.MemoryInfo();
         Debug.getMemoryInfo(mi);
-        System.out.println("talldave debug memory report took " + (startTime - new Date().getTime()) + " ms");
 
         StringJoiner j = new StringJoiner("\n", " \n", "");
         for(Map.Entry<String, String> map: mi.getMemoryStats().entrySet()){
@@ -84,12 +91,10 @@ public class IntegratedUnitTest {
     }
 
     private String getActivityManagerMemoryReport(){
-        long startTime = new Date().getTime();
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
         assertNotNull("Could not determine memory usage", activityManager);
         activityManager.getMemoryInfo(mi2);
-        System.out.println("talldave am memory report took " + (startTime - new Date().getTime()) + " ms");
         return new StringJoiner("\n"," \n","")
                 .add("totalMem = " + ((float) mi2.totalMem/1024) + "K")
                 .add("availMem = " + ((float) mi2.availMem/1024) + "K")

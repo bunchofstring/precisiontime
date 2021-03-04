@@ -17,6 +17,10 @@ abstract public class LifecycleTestRule implements TestRule {
 
     public abstract void before() throws Throwable;
 
+    /**
+     * Reminder that clean up after tests is mandatory
+     * @throws Throwable
+     */
     public abstract void after() throws Throwable;
 
     @Override @NonNull
@@ -42,13 +46,6 @@ abstract public class LifecycleTestRule implements TestRule {
         given(p);
     }
 
-    private void attemptBefore() {
-        given(() -> {
-            LifecycleTestRule.this.before();
-            isPreconditionSatisfied = true;
-        });
-    }
-
     /**
      * Activates the provided precondition. Ensures that any exception stacktrace indicates a
      * problem while arranging the test - not in the body of the test itself.
@@ -60,6 +57,13 @@ abstract public class LifecycleTestRule implements TestRule {
         } catch (Throwable t) {
             throw new RuntimeException("Problem setting up (i.e. precondition not satisfied)", t);
         }
+    }
+
+    private void attemptBefore() {
+        given(() -> {
+            LifecycleTestRule.this.before();
+            isPreconditionSatisfied = true;
+        });
     }
 
     private void attemptAfter() {

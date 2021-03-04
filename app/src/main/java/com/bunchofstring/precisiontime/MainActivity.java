@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String KEY_HOST = "KEY_HOST";
 
-    private final static TimestampProvider timestampProvider = new NtpTimestampProvider();
+    private final TimestampProvider timestampProvider = new NtpTimestampProvider();
     private final static LabelMaker labelMaker = new LabelMaker();
 
     private final ValueAnimator animator = new ValueAnimator();
@@ -101,22 +101,22 @@ public class MainActivity extends AppCompatActivity {
         if(diff > 0) {
             frameSpacingLabel.setText(labelMaker.getIntervalLabel(diff, locale));
         }else{
-            frameSpacingLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+            frameSpacingLabel.setText(labelMaker.getUndefinedTimeLabel());
         }
         try {
             currentTimeLabel.setText(labelMaker.getTimeLabel(timestampProvider.getTimestamp(), locale));
         } catch (UnreliableTimeException e) {
-            currentTimeLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+            currentTimeLabel.setText(labelMaker.getUndefinedTimeLabel());
         }
         try {
             syncCountdownLabel.setText(labelMaker.getSecondsToSyncLabel(timestampProvider.getSecondsToSync(), locale));
         } catch (UnreliableTimeException e) {
-            syncCountdownLabel.setText(LabelMaker.UNDEFINED_TIME_LABEL);
+            syncCountdownLabel.setText(labelMaker.getUndefinedTimeLabel());
         }
         try {
             timeSinceSyncLabel.setText(labelMaker.getTimeSinceSyncLabel(timestampProvider.getSecondsSinceLastSync(), locale));
         } catch (UnreliableTimeException e) {
-            timeSinceSyncLabel.setText(LabelMaker.INVISIBLE_LABEL);
+            timeSinceSyncLabel.setText(null);
         }
 
         //Show or hide

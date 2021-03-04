@@ -19,7 +19,8 @@ import java.util.logging.Logger;
 public class RecordingInProgress {
 
     private static final Logger LOGGER = Logger.getLogger(RecordingInProgress.class.getSimpleName());
-    private static final String CMD = "screenrecord --bit-rate 1000000 --bugreport --verbose %s";
+
+    private static final String CMD = "screenrecord --bit-rate 1000000 --bugreport --show-frame-time --verbose  %s";
 
     private final ExecutorService mRecorder = Executors.newSingleThreadExecutor();
     private final ExecutorService mTeardown = Executors.newSingleThreadExecutor();
@@ -73,11 +74,11 @@ public class RecordingInProgress {
 
         try {
             Files.delete(mFile.getParentFile().toPath());
-        } catch (DirectoryNotEmptyException dnee) {
+        } catch (DirectoryNotEmptyException ignored) {
             /*
             No implementation. We take the "tell, don't ask" approach to cleaning up a parent
             directory which MIGHT no longer be necessary. This catches in case the directory is
-            (in fact) still necessary
+            (in fact) still populated
             */
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Could not clean up the directory " + mFile, e);
@@ -153,15 +154,12 @@ public class RecordingInProgress {
         });
 
         mTeardown.submit(() -> {
-            LOGGER.log(Level.INFO, "FOOOOOO!!!");
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e);
             }
             mPid = awaitScreenRecorderPid(current);
-
-            LOGGER.log(Level.INFO, "BAAAAAR!!!");
         });
     }
 }

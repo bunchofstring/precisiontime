@@ -26,10 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    useLibrary 'android.test.runner'
-    useLibrary 'android.test.base'
-    useLibrary 'android.test.mock'
 }
 
 repositories {
@@ -66,7 +62,8 @@ buildscript {
 
 ext.getCaptureDeviceDir = { ->
     def defaultCaptureDeviceDir = "/sdcard/Pictures/Captures"
-    return project.properties["android.testInstrumentationRunnerArguments.captureDeviceDir"] ?: defaultCaptureDeviceDir
+    def propertyName = "android.testInstrumentationRunnerArguments.captureDeviceDir"
+    return project.properties[propertyName] ?: defaultCaptureDeviceDir
 }
 
 def transferCapturesTask = task('transferCaptures', type: Exec, group: 'reporting') {

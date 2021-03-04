@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertTrue;
 
-public class MainPageObject {
+public final class MainPageObject {
 
     private final static String RES_ID_PROGRESS_INDICATOR = "status_actively_syncing";
     private final static String RES_ID_TIME_LABEL = "current_time";
@@ -22,6 +22,9 @@ public class MainPageObject {
     private final static long SHORT_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.SECONDS);
     private final static long LONG_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
     private final static long KEYBOARD_DISMISSAL_DELAY = TimeUnit.MILLISECONDS.toMillis(200L);
+
+    private final static String VALID_NTP_HOST_0 = "0.pool.ntp.org";
+    private final static String VALID_NTP_HOST_1 = "1.pool.ntp.org";
 
     public static void enterNtpHost(@NonNull final String host){
         final UiObject2 ntpHostField = getNtpHostField();
@@ -49,5 +52,15 @@ public class MainPageObject {
         return CoreUtils.getDevice().wait(Until.findObject(By
                 .res(TestConfig.PACKAGE_NAME, "ntp_host")
                 .clickable(true)), SHORT_TIMEOUT);
+    }
+
+    public static void changeNtpHost(){
+        final String currentHost = getNtpHostField().getText();
+        final String nextHost = getValidNtpHost(currentHost);
+        enterNtpHost(nextHost);
+    }
+
+    private static String getValidNtpHost(final String exclude){
+        return (VALID_NTP_HOST_0.equals(exclude) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0);
     }
 }

@@ -3,10 +3,10 @@ package com.bunchofstring.precisiontime.test;
 import androidx.test.uiautomator.UiObject2;
 
 import com.bunchofstring.precisiontime.test.core.TestConfig;
-import com.bunchofstring.precisiontime.test.pageobject.AppPageObject;
 import com.bunchofstring.precisiontime.test.pageobject.MainPageObject;
 import com.bunchofstring.test.AppLifecycleTestRule;
 import com.bunchofstring.test.FrameworkSpeedRule;
+import com.bunchofstring.test.FreshStartTestRule;
 import com.bunchofstring.test.LifecycleTestRule;
 import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
@@ -20,33 +20,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class CoreUiTest {
 
-    private final static String NEW_NTP_HOST_0 = "0.pool.ntp.org";
-    private final static String NEW_NTP_HOST_1 = "1.pool.ntp.org";
-    private final static String NEW_NTP_HOST_2 = "2.pool.ntp.org";
-
     @ClassRule
     public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
             .around(new FrameworkSpeedRule())
             .around(new TouchMarkupRule())
-            .around(new LifecycleTestRule() {
-                @Override
-                public void before() throws Throwable {
-                    AppPageObject.reset();
-                }
-
-                @Override
-                public void after() {
-                    //No implementation
-                }
-            });
+            .around(new FreshStartTestRule(TestConfig.PACKAGE_NAME));
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()
@@ -63,7 +47,7 @@ public class CoreUiTest {
         assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel());
     }
 
-    @Flaky(traceAllFailures = true)
+    @Flaky
     @Test
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
@@ -72,7 +56,7 @@ public class CoreUiTest {
         });
 
         //When
-        MainPageObject.enterNtpHost(NEW_NTP_HOST_0);
+        MainPageObject.changeNtpHost();
 
         //Then
         assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
@@ -81,29 +65,28 @@ public class CoreUiTest {
     @Test
     public void test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus() {
         //Given
-        AtomicReference<UiObject2> ntpHostField = new AtomicReference<>();
         LifecycleTestRule.establishPrecondition(() -> {
-            ntpHostField.set(MainPageObject.getNtpHostField());
-            assertFalse("Unexpected focus on NTP host field", ntpHostField.get().isFocused());
+            assertFalse("Unexpected focus on NTP host field", MainPageObject.getNtpHostField().isFocused());
         });
 
         //When
-        ntpHostField.get().click();
+        final UiObject2 ntpHostField = MainPageObject.getNtpHostField();
+        ntpHostField.click();
 
         //Then
-        assertTrue("NTP host field not focused", ntpHostField.get().isFocused());
+        assertTrue("NTP host field not focused", ntpHostField.isFocused());
     }
 
     @Test
     public void test_GivenTimeSyncInProgress_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
-            MainPageObject.enterNtpHost(NEW_NTP_HOST_1);
+            MainPageObject.changeNtpHost();
             assertNotNull("Time sync is not in progress", MainPageObject.getProgressIndicator());
         });
 
         //When
-        MainPageObject.enterNtpHost(NEW_NTP_HOST_2);
+        MainPageObject.changeNtpHost();
 
         //Then
         assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());

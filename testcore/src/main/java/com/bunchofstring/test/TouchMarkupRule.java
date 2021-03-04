@@ -18,6 +18,10 @@ public class TouchMarkupRule extends LifecycleTestRule {
         hideVisualIndicators();
     }
 
+    /**
+     * Show crosshairs for touches and leave a pixel trail
+     * @return true if the device received the request to show the indicators, false otherwise
+     */
     public static boolean showVisualIndicators(){
         try {
             CoreUtils.executeShellCommand("content insert --uri content://settings/system --bind name:s:pointer_location --bind value:i:1");
@@ -29,6 +33,10 @@ public class TouchMarkupRule extends LifecycleTestRule {
         }
     }
 
+    /**
+     * Hide crosshairs for touches as well as the pixel trail
+     * @return true if the device received the request to hide the indicators, false otherwise
+     */
     public static boolean hideVisualIndicators(){
         try {
             CoreUtils.executeShellCommand("content insert --uri content://settings/system --bind name:s:pointer_location --bind value:i:0");

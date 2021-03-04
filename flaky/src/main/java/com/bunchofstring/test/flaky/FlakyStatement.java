@@ -4,6 +4,9 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +23,8 @@ class FlakyStatement extends Statement {
     private final boolean itemizeSummary;
 
     private final StringJoiner results = new StringJoiner("\n");
-    private final Throwable summaryException = new Throwable("Too flaky");
+
+    private final Collection<Throwable> supressedThrowables = new ArrayList<>();
 
     FlakyStatement(final Statement base, final Description description, final Flaky flaky) {
         this.base = base;
@@ -43,6 +47,10 @@ class FlakyStatement extends Statement {
 
         //Only fail if all tests fail
         if (failureCount == iterations) {
+            final FlakyException summaryException = new FlakyException(String.format(Locale.getDefault(),
+                    "Failed %d/%d attempts (traceAllFailures=%b, itemizeSummary=%b)",
+                    failureCount, iterations, traceAllFailures, itemizeSummary));
+            supressedThrowables.forEach(summaryException::addSuppressed);
             throw summaryException;
         }
     }
@@ -68,8 +76,7 @@ class FlakyStatement extends Statement {
         final float failureRate = (float) failureCount / iterations;
         final String frLabel = new DecimalFormat("##%").format(failureRate);
         final String summary = String.format("Flaky Test Summary for %s (%s failure rate)",
-                description.getDisplayName(),
-                frLabel);
+                description.getDisplayName(), frLabel);
 
         final String newLine = "\n";
         final String emptyLine = newLine + newLine;
@@ -92,7 +99,7 @@ class FlakyStatement extends Statement {
     }
 
     private void handleTestFailure(final String iteration, final Throwable t) {
-        summaryException.addSuppressed(t);
+        supressedThrowables.add(t);
         final String oneLiner = String.format("Flaky test iteration %s failed", iteration);
 
         if(traceAllFailures){

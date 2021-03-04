@@ -40,9 +40,7 @@ public class FailureVideoTestWatcher extends TestWatcher {
             mPadding = acceptableRange.getLower();
             LOGGER.log(Level.WARNING, String.format(Locale.getDefault(),
                     "The specified padding %d is outside the acceptable range (%d - %d). Falling back to lowest acceptable padding",
-                    padding,
-                    acceptableRange.getLower(),
-                    acceptableRange.getUpper()));
+                    padding, acceptableRange.getLower(), acceptableRange.getUpper()));
         }
     }
 
