@@ -144,7 +144,7 @@ public class RecordingInProgress {
                 final int widthActual = CoreUtils.getDevice().getDisplayWidth();
                 final int heightActual = CoreUtils.getDevice().getDisplayHeight();
                 final int widthAdjusted = 1024;
-                final int heightAdjusted = (int) Math.ceil((double) widthAdjusted/((double) widthActual/heightActual));
+                final int heightAdjusted = (int) Math.floor((double) widthAdjusted/((double) widthActual/heightActual));
 
                 //Wactual/Hactual = 1024/Hadjusted
                 //Hadjusted * (Wactual/Hactual) = 1024
