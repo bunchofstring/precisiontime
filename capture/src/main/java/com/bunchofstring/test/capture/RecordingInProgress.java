@@ -20,7 +20,7 @@ public class RecordingInProgress {
 
     private static final Logger LOGGER = Logger.getLogger(RecordingInProgress.class.getSimpleName());
 
-    private static final String CMD = "screenrecord --bit-rate 1000000 --bugreport --show-frame-time --verbose  %s";
+    private static final String CMD = "screenrecord %s --verbose --bugreport --show-frame-time --bit-rate 1000000 --size %dx%d";
 
     private final ExecutorService mRecorder = Executors.newSingleThreadExecutor();
     private final ExecutorService mTeardown = Executors.newSingleThreadExecutor();
@@ -141,7 +141,15 @@ public class RecordingInProgress {
         mRecorder.submit(() -> {
             try{
                 final String filePath = mFile.getCanonicalPath();
-                final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath);
+                final int widthActual = CoreUtils.getDevice().getDisplayWidth();
+                final int heightActual = CoreUtils.getDevice().getDisplayHeight();
+                final int widthAdjusted = 1024;
+                final int heightAdjusted = (int) Math.ceil((double) widthAdjusted/((double) widthActual/heightActual));
+
+                //Wactual/Hactual = 1024/Hadjusted
+                //Hadjusted * (Wactual/Hactual) = 1024
+                //Hadjusted = 1024/(Wactual/Hactual)
+                final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
                 LOGGER.log(Level.INFO, String.format("Starting screen recording to %s", filePath));
 
                 //Blocking
