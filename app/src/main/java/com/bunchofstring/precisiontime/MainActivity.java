@@ -19,15 +19,13 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
-
     private final static String KEY_HOST = "KEY_HOST";
 
+    //TODO: Non-static timestampProvider seems to be a problem here (i.e. two questions marks are shown)
     private final TimestampProvider timestampProvider = new NtpTimestampProvider();
-    private final static LabelMaker labelMaker = new LabelMaker();
-
     private final ValueAnimator animator = new ValueAnimator();
 
-    private static long previousFrameTimestamp;
+    private long previousFrameTimestamp;
     private TextView currentTimeLabel;
     private TextView frameSpacingLabel;
     private TextView syncCountdownLabel;
@@ -92,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onFrameValue(long value){
+        final LabelMaker labelMaker = new LabelMaker();
         final Locale locale = Locale.getDefault();
         final boolean isTimeSyncing = timestampProvider.isSyncing();
         final long diff = value - previousFrameTimestamp;

@@ -63,7 +63,6 @@ public class NtpTimeStampProviderLifecycleTest {
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_NonDeterministic() {
-        System.out.println("talldave - test");
         final int range = 10;
         final int cutoffAfter = 2;
         final int value = new Random().nextInt(range)+1;
