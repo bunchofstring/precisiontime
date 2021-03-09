@@ -146,7 +146,6 @@ public class RecordingInProgress {
 
         mRecorder.submit(() -> {
             try{
-                final String filePath = mFile.getCanonicalPath();
                 final Point p = CoreUtils.getDevice().getDisplaySizeDp();
                 final DisplayMetrics dm = Resources.getSystem().getDisplayMetrics();
                 final int widthActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.x, dm));
@@ -154,16 +153,9 @@ public class RecordingInProgress {
 
                 final int widthAdjusted = 1024;
                 final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
-                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
-                LOGGER.log(Level.INFO, "Result of "+widthActual+" "+heightActual);
+                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2); //Ensure even number
 
-
-                //Wactual/Hactual = 1024/Hadjusted
-                //(Hadjusted * Wactual)/Hactual = 1024
-
-                //Hadjusted = (1024 * Hactual) / Wactual
-
-                //Hadjusted = 1024/(Wactual/Hactual)
+                final String filePath = mFile.getCanonicalPath();
                 final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
                 LOGGER.log(Level.INFO, String.format("Starting screen recording to %s", filePath));
 
