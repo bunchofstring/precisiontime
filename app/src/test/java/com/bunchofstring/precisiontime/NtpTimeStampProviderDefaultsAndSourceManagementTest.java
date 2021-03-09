@@ -29,7 +29,7 @@ public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
 
     @Test
     public void test_NewInstanceIsDormant() {
-        Assert.assertFalse("Premature sync", ntp.isSyncing());
+        Assert.assertFalse("Premature sync", ntp.isSyncInProgress());
     }
 
     @Test

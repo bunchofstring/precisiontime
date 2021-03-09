@@ -13,5 +13,5 @@ interface TimestampProvider {
     long getTimestamp() throws UnreliableTimeException;
     long getSecondsToSync() throws UnreliableTimeException;
     long getSecondsSinceLastSync() throws UnreliableTimeException;
-    boolean isSyncing();
+    boolean isSyncInProgress();
 }

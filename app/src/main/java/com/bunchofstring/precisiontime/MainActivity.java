@@ -92,33 +92,26 @@ public class MainActivity extends AppCompatActivity {
     private void onFrameValue(long value){
         final LabelMaker labelMaker = new LabelMaker();
         final Locale locale = Locale.getDefault();
-        final boolean isTimeSyncing = timestampProvider.isSyncing();
         final long diff = value - previousFrameTimestamp;
         previousFrameTimestamp = value;
 
         //Update
-        if(diff > 0) {
-            frameSpacingLabel.setText(labelMaker.getIntervalLabel(diff, locale));
-        }else{
-            frameSpacingLabel.setText(labelMaker.getUndefinedTimeLabel());
-        }
+        final String intervalLabel = (diff > 0) ?
+                labelMaker.getIntervalLabel(diff, locale) :
+                labelMaker.getUndefinedTimeLabel();
+        frameSpacingLabel.setText(intervalLabel);
         try {
             currentTimeLabel.setText(labelMaker.getTimeLabel(timestampProvider.getTimestamp(), locale));
-        } catch (UnreliableTimeException e) {
-            currentTimeLabel.setText(labelMaker.getUndefinedTimeLabel());
-        }
-        try {
             syncCountdownLabel.setText(labelMaker.getSecondsToSyncLabel(timestampProvider.getSecondsToSync(), locale));
-        } catch (UnreliableTimeException e) {
-            syncCountdownLabel.setText(labelMaker.getUndefinedTimeLabel());
-        }
-        try {
             timeSinceSyncLabel.setText(labelMaker.getTimeSinceSyncLabel(timestampProvider.getSecondsSinceLastSync(), locale));
         } catch (UnreliableTimeException e) {
+            currentTimeLabel.setText(labelMaker.getUndefinedTimeLabel());
+            syncCountdownLabel.setText(labelMaker.getUndefinedTimeLabel());
             timeSinceSyncLabel.setText(null);
         }
 
         //Show or hide
+        final boolean isTimeSyncing = timestampProvider.isSyncInProgress();
         syncCountdownLabel.setVisibility((isTimeSyncing) ? View.GONE : View.VISIBLE);
         syncStatus.setVisibility((isTimeSyncing) ? View.VISIBLE : View.GONE);
     }

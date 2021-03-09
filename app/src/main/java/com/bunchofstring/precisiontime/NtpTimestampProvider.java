@@ -1,14 +1,17 @@
 package com.bunchofstring.precisiontime;
 
+import com.instacart.library.truetime.CacheInterface;
 import com.instacart.library.truetime.TrueTimeRx;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -23,27 +26,51 @@ public class NtpTimestampProvider implements TimestampProvider {
     private final GregorianCalendar currentTime = new GregorianCalendar();
 
     private String host = DEFAULT_NTP_HOST;
-    private boolean isStarted;
-    private boolean isSyncing;
+    private boolean isActive;
+    private boolean isSyncInProgress;
     private Date lastSyncTimestamp;
-    private Disposable periodicSync;
+    private Disposable syncOrchestrator;
+    DisposableSingleObserver<Date> syncOperation;
+
+    TrueTimeRx tt = TrueTimeRx.build()
+            .withLoggingEnabled(true)
+            .withCustomizedCache(new CacheInterface() { //TODO: Remove because it does not seem to help with long monitor contention
+                //Threadsafe as a precaution
+                private final ConcurrentHashMap<String, Long> map = new ConcurrentHashMap<>();
+
+                @Override
+                public void put(String key, long value) {
+                    map.put(key,value);
+                }
+
+                @Override
+                public long get(String key, long defaultValue) {
+                    return (map.containsKey(key)) ? map.get(key) : defaultValue;
+                }
+
+                @Override
+                public void clear() {
+                    map.clear();
+                }
+            });
 
     @Override
     public void start() {
-        if(isStarted) {
-            LOGGER.log(Level.WARNING, "Periodic sync is already started");
-        } else {
+        if(!isActive) {
+            isActive = true;
             LOGGER.log(Level.INFO, "Starting periodic sync");
-            isStarted = true;
             sync();
+        } else {
+            LOGGER.log(Level.WARNING, "Periodic sync is already started");
         }
     }
 
     @Override
     public void stop() {
         LOGGER.log(Level.INFO, "Stoping periodic sync");
-        isStarted = false;
-        stopPeriodicSync();
+        isActive = false;
+        cancelSync();
+        cancelScheduledSync();
     }
 
     @Override
@@ -70,8 +97,8 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     @Override
-    public boolean isSyncing() {
-        return isSyncing;
+    public boolean isSyncInProgress() {
+        return isSyncInProgress;
     }
 
     @Override
@@ -79,7 +106,9 @@ public class NtpTimestampProvider implements TimestampProvider {
         LOGGER.log(Level.INFO,"Setting source to "+host);
         if(!host.equals(this.host)) {
             this.host = host;
-            if(isStarted) {
+            if(isActive) {
+                cancelSync();
+                cancelScheduledSync();
                 sync();
             }
         }
@@ -110,25 +139,31 @@ public class NtpTimestampProvider implements TimestampProvider {
         }
     }
 
+    private void onError(Throwable t){
+        cancelSync();
+        scheduleNextSync();
+        LOGGER.log(Level.SEVERE, "Problem fetching network time", t);
+    }
+
     private void onSync(Date date){
         LOGGER.log(Level.INFO, "Synchronized current time "+date);
         lastSyncTimestamp = date;
         currentTime.setTime(date);
+        cancelSync();
+        scheduleNextSync();
+    }
 
-        //App instances will attempt to sync at roughly the same time. For a set of different
-        //devices, this helps minimize the total error due to drift.
-        stopPeriodicSync();
+    /**
+     * App instances will attempt to sync at roughly the same time. For a set of different devices,
+     * this helps minimize the total error due to drift.
+     */
+    private void scheduleNextSync(){
         try {
             long orchestrated = getMillisecondsToSync();
-            periodicSync = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(() -> sync());
+            syncOrchestrator = Completable.timer(orchestrated, TimeUnit.MILLISECONDS).subscribe(() -> sync());
         } catch (UnreliableTimeException e) {
             e.printStackTrace();
         }
-    }
-
-    private void onError(Throwable t){
-        isSyncing = false;
-        LOGGER.log(Level.SEVERE, "Problem fetching network time", t);
     }
 
     private long getMillisecondsToSync() throws UnreliableTimeException {
@@ -145,54 +180,49 @@ public class NtpTimestampProvider implements TimestampProvider {
     }
 
     private void sync(){
-        isSyncing = true;
-
-        TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(true);
-        boolean isInitialized = TrueTimeRx.isInitialized();
-
-        if(isInitialized){
-            LOGGER.log(Level.INFO, "Resyncing with source "+host);
-            tt.initializeNtp(host)
-                    .map(longs -> TrueTimeRx.now())
-                    .subscribeOn(Schedulers.io())
-                    //Method reference does not work for these subscribers
-                    .subscribeWith(new DisposableSingleObserver<Date>() {
-                        @Override
-                        public void onSuccess(Date date) {
-                            //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
-                            NtpTimestampProvider.this.onSync(date);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
-                            NtpTimestampProvider.this.onError(e);
-                        }
-                    });
-        }else{
-            LOGGER.log(Level.INFO, "Syncing with source "+host);
-            tt.initializeRx(host)
-                    .subscribeOn(Schedulers.io())
-                    .subscribeWith(new DisposableSingleObserver<Date>() {
-                        @Override
-                        public void onSuccess(Date date) {
-                            //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
-                            NtpTimestampProvider.this.onSync(date);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
-                            NtpTimestampProvider.this.onError(e);
-                        }
-                    });
+        if(!isSyncInProgress) {
+            LOGGER.log(Level.INFO, "Syncing with source " + host);
+            isSyncInProgress = true;
+            syncOperation = newSyncOperation(host);
         }
     }
 
-    private void stopPeriodicSync(){
-        isSyncing = false;
-        if(periodicSync != null){
-            periodicSync.dispose();
+    private DisposableSingleObserver<Date> newSyncOperation(final String host){
+        final DisposableSingleObserver<Date> syncObserver = new DisposableSingleObserver<Date>() {
+            @Override
+            public void onSuccess(Date date) {
+                //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
+                isSyncInProgress = false;
+                NtpTimestampProvider.this.onSync(date);
+                dispose();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
+                isSyncInProgress = false;
+                NtpTimestampProvider.this.onError(e);
+                dispose();
+            }
+        };
+        final Single<Date> single = (TrueTimeRx.isInitialized()) ?
+                tt.initializeNtp(host).map(longs -> TrueTimeRx.now()) :
+                tt.initializeRx(host);
+        return single
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                //Note: Method reference does not work for these subscribers
+                .subscribeWith(syncObserver);
+    }
+
+    private void cancelSync(){
+        isSyncInProgress = false;
+        syncOperation.dispose();
+    }
+
+    private void cancelScheduledSync(){
+        if(syncOrchestrator != null) {
+            syncOrchestrator.dispose();
         }
     }
 }

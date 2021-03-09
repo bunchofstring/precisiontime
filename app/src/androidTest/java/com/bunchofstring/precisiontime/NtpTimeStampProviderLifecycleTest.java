@@ -50,14 +50,14 @@ public class NtpTimeStampProviderLifecycleTest {
     @Test
     public void test_WhenStart_AttemptSync() {
         ntp.start();
-        Assert.assertTrue("Start did not initiate network time sync", ntp.isSyncing());
+        Assert.assertTrue("Start did not initiate network time sync", ntp.isSyncInProgress());
     }
 
     @Test
     public void test_CanStopPeriodicSync() {
         ntp.start();
         ntp.stop();
-        Assert.assertFalse("Could not stop periodic network time synchronization", ntp.isSyncing());
+        Assert.assertFalse("Could not stop periodic network time synchronization", ntp.isSyncInProgress());
     }
 
     @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)

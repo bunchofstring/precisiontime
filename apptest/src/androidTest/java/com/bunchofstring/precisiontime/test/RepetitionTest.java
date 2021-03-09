@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
-@Ignore("Only needed to demonstrate failure handling - using different mechanisms for repetition")
+//@Ignore("Only needed to demonstrate failure handling - using different mechanisms for repetition")
 public class RepetitionTest {
 
     @ClassRule

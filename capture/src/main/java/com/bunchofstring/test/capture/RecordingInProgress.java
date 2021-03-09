@@ -1,5 +1,11 @@
 package com.bunchofstring.test.capture;
 
+import android.content.res.Resources;
+import android.graphics.Point;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.WindowManager;
+
 import com.bunchofstring.test.CoreUtils;
 
 import java.io.File;
@@ -141,13 +147,22 @@ public class RecordingInProgress {
         mRecorder.submit(() -> {
             try{
                 final String filePath = mFile.getCanonicalPath();
-                final int widthActual = CoreUtils.getDevice().getDisplayWidth();
-                final int heightActual = CoreUtils.getDevice().getDisplayHeight();
+                final Point p = CoreUtils.getDevice().getDisplaySizeDp();
+                final DisplayMetrics dm = Resources.getSystem().getDisplayMetrics();
+                final int widthActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.x, dm));
+                final int heightActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.y, dm));
+
                 final int widthAdjusted = 1024;
-                final int heightAdjusted = (int) Math.floor((double) widthAdjusted/((double) widthActual/heightActual));
+                final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
+                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
+                LOGGER.log(Level.INFO, "Result of "+widthActual+" "+heightActual);
+
 
                 //Wactual/Hactual = 1024/Hadjusted
-                //Hadjusted * (Wactual/Hactual) = 1024
+                //(Hadjusted * Wactual)/Hactual = 1024
+
+                //Hadjusted = (1024 * Hactual) / Wactual
+
                 //Hadjusted = 1024/(Wactual/Hactual)
                 final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
                 LOGGER.log(Level.INFO, String.format("Starting screen recording to %s", filePath));
