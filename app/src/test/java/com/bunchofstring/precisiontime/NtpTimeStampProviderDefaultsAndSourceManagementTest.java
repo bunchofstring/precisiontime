@@ -1,13 +1,13 @@
 package com.bunchofstring.precisiontime;
 
+import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
+import com.bunchofstring.precisiontime.core.UnreliableTimeException;
 import com.bunchofstring.test.LifecycleTestRule;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-
-import static org.junit.Assert.*;
 
 public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
 
@@ -36,7 +36,7 @@ public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
     public void test_GivenNewInstance_ThenTimestampIsUnreliable(){
         try {
             ntp.getTimestamp();
-            fail("Returned an unreliable value for timestamp");
+            Assert.fail("Returned an unreliable value for timestamp");
         } catch (UnreliableTimeException e) {
             //No implementation
         }
@@ -46,9 +46,9 @@ public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
     public void test_GivenNewInstance_ThenSecondsSinceLastSyncIsUnreliable() {
         try {
             ntp.getSecondsSinceLastSync();
-            fail("Returned an unreliable value for seconds since last sync");
+            Assert.fail("Returned an unreliable value for seconds since last sync");
         } catch (UnreliableTimeException e) {
-            //No implementation
+            //Expected
         }
     }
 
@@ -56,15 +56,15 @@ public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
     public void test_GivenNewInstance_ThenSecondsToSyncIsUnreliable() {
         try {
             ntp.getSecondsToSync();
-            fail("Returned an unreliable value for seconds to sync");
+            Assert.fail("Returned an unreliable value for seconds to sync");
         } catch (UnreliableTimeException e) {
-            //No implementation
+            //Expected
         }
     }
 
     @Test
     public void test_GivenNewInstance_ThenDefaultSourceNotNull() {
-        assertNotNull(ntp.getSource());
+        Assert.assertNotNull(ntp.getSource());
     }
 
     @Test

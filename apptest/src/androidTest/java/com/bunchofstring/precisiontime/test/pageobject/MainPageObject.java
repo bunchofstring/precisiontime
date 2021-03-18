@@ -12,7 +12,7 @@ import com.bunchofstring.test.CoreUtils;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
 
 public final class MainPageObject {
 
@@ -34,7 +34,7 @@ public final class MainPageObject {
         //Needs a bit more time to dismiss the keyboard consistently
         final UiDevice device = CoreUtils.getDevice();
         //device.waitForIdle(KEYBOARD_DISMISSAL_DELAY);
-        assertTrue("Could not enter the value", device.pressEnter());
+        Assert.assertTrue("Could not enter the value", device.pressEnter());
     }
 
     public static UiObject2 getProgressIndicator(){

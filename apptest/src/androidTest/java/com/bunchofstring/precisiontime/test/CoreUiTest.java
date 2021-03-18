@@ -15,14 +15,11 @@ import com.bunchofstring.test.capture.FailureVideoTestWatcher;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class CoreUiTest {
 
@@ -44,7 +41,7 @@ public class CoreUiTest {
     @Test
     public void test_WhenLaunch_ThenDisplayTime() {
         //Then
-        assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel());
+        Assert.assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel());
     }
 
     @Flaky
@@ -52,21 +49,21 @@ public class CoreUiTest {
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
-            assertNotNull("Time not displayed", MainPageObject.getTimeLabel());
+            Assert.assertNotNull("Time not displayed", MainPageObject.getTimeLabel());
         });
 
         //When
         MainPageObject.changeNtpHost();
 
         //Then
-        assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
+        Assert.assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
     }
 
     @Test
     public void test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
-            assertFalse("Unexpected focus on NTP host field", MainPageObject.getNtpHostField().isFocused());
+            Assert.assertFalse("Unexpected focus on NTP host field", MainPageObject.getNtpHostField().isFocused());
         });
 
         //When
@@ -74,7 +71,7 @@ public class CoreUiTest {
         ntpHostField.click();
 
         //Then
-        assertTrue("NTP host field not focused", ntpHostField.isFocused());
+        Assert.assertTrue("NTP host field not focused", ntpHostField.isFocused());
     }
 
     @Test
@@ -82,13 +79,13 @@ public class CoreUiTest {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
             MainPageObject.changeNtpHost();
-            assertNotNull("Time sync is not in progress", MainPageObject.getProgressIndicator());
+            Assert.assertNotNull("Time sync is not in progress", MainPageObject.getProgressIndicator());
         });
 
         //When
         MainPageObject.changeNtpHost();
 
         //Then
-        assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
+        Assert.assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
     }
 }

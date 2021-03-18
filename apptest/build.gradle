@@ -10,7 +10,6 @@ android {
         versionCode 8
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        //testInstrumentationRunnerArguments 'android.testInstrumentationRunnerArguments.captureDeviceDir': '/sdcard/Pictures/CapturesAlternative'
         testOptions {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
         }
@@ -67,10 +66,6 @@ ext.getCaptureDeviceDir = { ->
 }
 
 def transferCapturesTask = task('transferCaptures', type: Exec, group: 'reporting') {
-    //TODO: Run conditionally based only if any screenshot or video is captured (e.g. Capture.screenshot(...)) - NOT only if a test failed
-    /*onlyIf {
-        connectedDebugAndroidTest.getTestFailed()
-    }*/
     def sourceDirectory = getCaptureDeviceDir()
     def destinationDirectory = getReportsDir().toString()+"/androidTests/connected"
     doFirst {
@@ -83,11 +78,7 @@ def transferCapturesTask = task('transferCaptures', type: Exec, group: 'reportin
     ignoreExitValue true
 }
 
-//TODO: Make this safe in case captureDeviceDir config is not supplied
 def cleanUpCapturesTask = task('cleanUpCaptures', type: Exec, group: 'reporting') {
-    /*onlyIf {
-        connectedDebugAndroidTest.getTestFailed()
-    }*/
     def sourceDirectory = getCaptureDeviceDir()
     doFirst {
         println "Cleaning up captures from device at " + sourceDirectory

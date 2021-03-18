@@ -10,8 +10,6 @@ public class FailureScreenshotTestWatcher extends TestWatcher {
 
     private static final Logger LOGGER = Logger.getLogger(FailureScreenshotTestWatcher.class.getSimpleName());
 
-    //TODO: Constructor that takes an Instrumentation as an argument (PC-side test)
-
     @Override
     protected void failed(Throwable e, Description description){
         LOGGER.log(Level.INFO, "Screenshot required...");

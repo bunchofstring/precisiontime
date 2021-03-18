@@ -3,11 +3,8 @@ package com.bunchofstring.test.flaky;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-@Target(METHOD)
-@Retention(RUNTIME)
+@Target(java.lang.annotation.ElementType.METHOD)
+@Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
 public @interface Flaky {
     /**
      * Optionally, specify the number of <code>iterations</code> required to determine the test

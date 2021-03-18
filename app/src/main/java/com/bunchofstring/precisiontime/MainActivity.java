@@ -13,6 +13,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
+import com.bunchofstring.precisiontime.core.TimestampProvider;
+import com.bunchofstring.precisiontime.core.UnreliableTimeException;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -21,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static String KEY_HOST = "KEY_HOST";
 
-    //TODO: Non-static timestampProvider seems to be a problem here (i.e. two questions marks are shown)
     private final TimestampProvider timestampProvider = new NtpTimestampProvider();
     private final ValueAnimator animator = new ValueAnimator();
 

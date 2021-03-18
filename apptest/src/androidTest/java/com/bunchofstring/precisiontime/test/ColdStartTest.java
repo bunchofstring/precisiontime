@@ -9,13 +9,12 @@ import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
-
-import static org.junit.Assert.assertFalse;
 
 public class ColdStartTest {
 
@@ -33,6 +32,6 @@ public class ColdStartTest {
     @Test
     public void test_GivenNotRunning_WhenLaunch_ThenDoNotAutoFocus() {
         //Then
-        assertFalse("Text field stole focus on launch", MainPageObject.getNtpHostField().isFocused());
+        Assert.assertFalse("Text field stole focus on launch", MainPageObject.getNtpHostField().isFocused());
     }
 }

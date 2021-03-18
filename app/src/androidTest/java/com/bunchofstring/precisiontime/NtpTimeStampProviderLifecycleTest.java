@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
 import com.bunchofstring.test.LifecycleTestRule;
 import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
@@ -21,11 +22,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringJoiner;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class NtpTimeStampProviderLifecycleTest {
 
@@ -66,13 +62,13 @@ public class NtpTimeStampProviderLifecycleTest {
         final int range = 10;
         final int cutoffAfter = 2;
         final int value = new Random().nextInt(range)+1;
-        assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
+        Assert.assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
     }
 
     //@Category(PerformanceTests.class)
     @Test
     public void test_GivenMemoryPressure_ThenOperateWithinThreshold() {
-        //TODO: Set a threshold based on actual, tax the system, and take a measurement
+        //TODO: Set a threshold based on actual. Fail if the measurement exceeds the threshold
         Log.d("performance (ActivityManager.MemoryInfo)", getActivityManagerMemoryReport());
         Log.d("performance (Debug.MemoryInfo)", getDebugMemoryReport());
     }
@@ -92,7 +88,7 @@ public class NtpTimeStampProviderLifecycleTest {
     private String getActivityManagerMemoryReport(){
         ActivityManager.MemoryInfo mi2 = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        assertNotNull("Could not determine memory usage", activityManager);
+        Assert.assertNotNull("Could not determine memory usage", activityManager);
         activityManager.getMemoryInfo(mi2);
         return new StringJoiner("\n"," \n","")
                 .add("totalMem = " + ((float) mi2.totalMem/1024) + "K")

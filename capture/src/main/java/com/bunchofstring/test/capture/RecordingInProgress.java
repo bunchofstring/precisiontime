@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.WindowManager;
 
 import com.bunchofstring.test.CoreUtils;
 
@@ -26,7 +25,7 @@ public class RecordingInProgress {
 
     private static final Logger LOGGER = Logger.getLogger(RecordingInProgress.class.getSimpleName());
 
-    private static final String CMD = "screenrecord %s --verbose --bugreport --show-frame-time --bit-rate 1000000 --size %dx%d";
+    private static final String CMD = "screenrecord %s --size %dx%d --bit-rate 1000000 --verbose --bugreport --show-frame-time";
 
     private final ExecutorService mRecorder = Executors.newSingleThreadExecutor();
     private final ExecutorService mTeardown = Executors.newSingleThreadExecutor();
@@ -151,9 +150,11 @@ public class RecordingInProgress {
                 final int widthActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.x, dm));
                 final int heightActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.y, dm));
 
+                //At least one emulator on Windows cannot do screenrecord for anything bigger (not even at native display resolution)
                 final int widthAdjusted = 1024;
                 final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
-                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2); //Ensure even number
+                //Ensure even number
+                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
 
                 final String filePath = mFile.getCanonicalPath();
                 final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);

@@ -1,9 +1,9 @@
-package com.bunchofstring.precisiontime;
+package com.bunchofstring.precisiontime.core;
 
 
 import androidx.annotation.NonNull;
 
-interface TimestampProvider {
+public interface TimestampProvider {
     void start();
     void stop();
     void restoreDefaultSource();
