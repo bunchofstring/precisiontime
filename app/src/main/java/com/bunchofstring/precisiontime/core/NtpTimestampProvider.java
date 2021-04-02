@@ -1,58 +1,31 @@
 package com.bunchofstring.precisiontime.core;
 
-import com.instacart.library.truetime.CacheInterface;
 import com.instacart.library.truetime.TrueTimeRx;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class NtpTimestampProvider implements TimestampProvider {
+final public class NtpTimestampProvider implements TimestampProvider {
 
     private static final Logger LOGGER = Logger.getLogger(NtpTimestampProvider.class.getSimpleName());
 
     private static final String DEFAULT_NTP_HOST = "pool.ntp.org";
-    private static final int SYNC_INTERVAL_MS = 1000 * 60 * 10;
 
+    TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(false);
     private final GregorianCalendar currentTime = new GregorianCalendar();
+    private final SyncOrchestrator syncOrchestrator = new SyncOrchestrator(this::sync);
 
     private String host = DEFAULT_NTP_HOST;
     private boolean isActive;
     private boolean isSyncInProgress;
     private Date lastSyncTimestamp;
-    private Disposable syncOrchestrator;
     DisposableSingleObserver<Date> syncOperation;
-
-    TrueTimeRx tt = TrueTimeRx.build()
-            .withLoggingEnabled(true)
-            .withCustomizedCache(new CacheInterface() { //TODO: Remove because it does not seem to help with long monitor contention
-                //Threadsafe as a precaution
-                private final ConcurrentHashMap<String, Long> map = new ConcurrentHashMap<>();
-
-                @Override
-                public void put(String key, long value) {
-                    map.put(key,value);
-                }
-
-                @Override
-                public long get(String key, long defaultValue) {
-                    return (map.containsKey(key)) ? map.get(key) : defaultValue;
-                }
-
-                @Override
-                public void clear() {
-                    map.clear();
-                }
-            });
 
     @Override
     public void start() {
@@ -70,29 +43,24 @@ public class NtpTimestampProvider implements TimestampProvider {
         LOGGER.log(Level.INFO, "Stoping periodic sync");
         isActive = false;
         cancelSync();
-        cancelScheduledSync();
+        syncOrchestrator.cancelScheduledSync();
     }
 
     @Override
     public long getTimestamp() throws UnreliableTimeException {
-        assertReliable();
-        currentTime.setTime(TrueTimeRx.now());
-        return currentTime.getTimeInMillis();
+        return getReliableDate().getTime();
     }
 
     @Override
     public long getSecondsToSync() throws UnreliableTimeException {
-        assertReliable();
-        return millisecondsToSeconds(getMillisecondsToSync());
+        final Date now = getReliableDate();
+        final long millisecondsUntilSync = syncOrchestrator.getMillisecondsUntilSync(now);
+        return millisecondsToSeconds(millisecondsUntilSync);
     }
 
     @Override
     public long getSecondsSinceLastSync() throws UnreliableTimeException {
-        getTimestamp();
-        assertReliable();
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(lastSyncTimestamp);
-        long diff = (currentTime.getTimeInMillis() - cal.getTimeInMillis());
+        long diff = (getReliableDate().getTime() - lastSyncTimestamp.getTime());
         return millisecondsToSeconds(diff);
     }
 
@@ -108,7 +76,6 @@ public class NtpTimestampProvider implements TimestampProvider {
             this.host = host;
             if(isActive) {
                 cancelSync();
-                cancelScheduledSync();
                 sync();
             }
         }
@@ -124,8 +91,15 @@ public class NtpTimestampProvider implements TimestampProvider {
         return host;
     }
 
+    private Date getReliableDate() throws UnreliableTimeException {
+        assertReliable();
+        return TrueTimeRx.now();
+    }
+
     private void assertReliable() throws UnreliableTimeException {
-        if(!isReliable()) throw new UnreliableTimeException();
+        if(!isReliable()) {
+            throw new UnreliableTimeException();
+        }
     }
 
     private boolean isReliable(){
@@ -135,25 +109,23 @@ public class NtpTimestampProvider implements TimestampProvider {
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(lastSyncTimestamp);
             long elapsedSinceLastSync = currentTime.getTimeInMillis() - cal.getTimeInMillis();
-            return elapsedSinceLastSync < SYNC_INTERVAL_MS;
+            return elapsedSinceLastSync < TimestampProvider.SYNC_INTERVAL_MS;
         }
     }
 
     private void onError(Throwable t){
         cancelSync();
-        scheduleNextSync();
+        sync();
         LOGGER.log(Level.SEVERE, "Problem fetching network time", t);
     }
 
-    private void onSync(Date date){
-        LOGGER.log(Level.INFO, "Synchronized current time "+date);
-        lastSyncTimestamp = date;
-        currentTime.setTime(date);
+    private void onSync(Date now){
+        LOGGER.log(Level.INFO, "Synchronized current time "+now);
+        lastSyncTimestamp = now;
+        currentTime.setTime(now);
         cancelSync();
-        scheduleNextSync();
+        syncOrchestrator.scheduleNextSync(now);
     }
-
-
 
     private long millisecondsToSeconds(long milliseconds){
         return (long)(((float) milliseconds) / 1000f);
@@ -198,11 +170,5 @@ public class NtpTimestampProvider implements TimestampProvider {
     private void cancelSync(){
         isSyncInProgress = false;
         syncOperation.dispose();
-    }
-
-    private void cancelScheduledSync(){
-        if(syncOrchestrator != null) {
-            syncOrchestrator.dispose();
-        }
     }
 }

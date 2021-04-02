@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 public class DeviceStoragePreparer {
 
     private static final Logger LOGGER = Logger.getLogger(DeviceStoragePreparer.class.getSimpleName());
+    //Environment.getExternalStorageDirectory().getPath()
     private static final String DIR_DEVICE_DEFAULT = "/sdcard/Pictures/Captures";
     private static final String[] REQUIRED_PERMISSIONS = {
             "android.permission.READ_EXTERNAL_STORAGE",
