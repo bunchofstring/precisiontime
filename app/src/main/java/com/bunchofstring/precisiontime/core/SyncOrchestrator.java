@@ -45,7 +45,7 @@ final public class SyncOrchestrator {
         timer = Completable
                 .timer(getMillisecondsUntilSync(now), TimeUnit.MILLISECONDS)
                 .subscribe(() -> {
-                    LOGGER.log(Level.WARNING, "Next sync");
+                    LOGGER.log(Level.INFO, "Next sync");
                     listener.onSyncRequested();
                 });
     }

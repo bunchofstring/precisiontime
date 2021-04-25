@@ -1,6 +1,15 @@
 package com.bunchofstring.precisiontime.test;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.bunchofstring.test.CoreUtils;
 import com.bunchofstring.test.FrameworkSpeedRule;
+import com.bunchofstring.test.LifecycleTestRule;
+import com.bunchofstring.test.NetworkConditioner;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
@@ -14,8 +23,11 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
+import java.io.IOException;
+import java.util.Random;
+
 //@Ignore("Only needed to demonstrate failure handling - using different mechanisms for repetition")
-public class RepetitionTest {
+public class _ExperimentalTest {
 
     @ClassRule
     public static TestRule classRule = new FrameworkSpeedRule();
@@ -26,6 +38,15 @@ public class RepetitionTest {
             .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new FailureScreenshotTestWatcher());
+
+    @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
+    @Test
+    public void test_NonDeterministic() {
+        final int range = 10;
+        final int cutoffAfter = 2;
+        final int value = new Random().nextInt(range)+1;
+        Assert.assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
+    }
 
     @Flaky
     @Test
@@ -61,4 +82,5 @@ public class RepetitionTest {
         result.getFailures().forEach(failure -> summary.addSuppressed(failure.getException()));
         return result.wasSuccessful();
     }*/
+
 }

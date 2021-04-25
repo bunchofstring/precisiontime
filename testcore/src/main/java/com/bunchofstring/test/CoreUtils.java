@@ -3,6 +3,7 @@ package com.bunchofstring.test;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -62,5 +63,11 @@ public class CoreUtils {
     public static Context getTargetApplicationContext(Instrumentation i){
         return i.getTargetContext().getApplicationContext();
         //TODO: See if ApplicationProvider.getApplicationContext() works just as well
+    }
+
+    public static boolean isEmulator(){
+        final boolean returnValue = Build.PRODUCT.startsWith("sdk");
+        LOGGER.log(Level.INFO,"isEmulator() "+returnValue+" "+Build.PRODUCT);
+        return returnValue;
     }
 }

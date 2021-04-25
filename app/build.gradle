@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
+    buildToolsVersion '30.0.3' //''29.0.2'
     defaultConfig {
         applicationId "com.bunchofstring.precisiontime"
         minSdkVersion 26
@@ -15,24 +16,13 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-
-tasks.withType(Test) {
-    testLogging {
-        exceptionFormat "full"
-        showCauses true
-        showExceptions true
-        showStackTraces true
-        showStandardStreams true
-        events = ["passed", "skipped", "failed", "standardOut", "standardError"]
     }
 }
 

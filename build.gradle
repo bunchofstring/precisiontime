@@ -21,11 +21,59 @@ allprojects {
     }
 }
 
+
+
+
+
+
+
+// A resolvable configuration to collect test reports data
+configurations {
+    testReportData {
+        canBeResolved = true
+        canBeConsumed = false
+        attributes {
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
+            attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, 'test-report-data'))
+        }
+    }
+}
+
+dependencies {
+    testReportData project('app')
+    //testReportData project('apptest')
+}
+
+task testReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/allTests")
+    // Include the results from the `test` task in all subprojects
+    //mustRunAfter subprojects.collect { it.tasks.withType(Test) }
+    //reportOn subprojects*.test
+    testResultDirs.from(configurations.testReportData)
+    //reportOn subprojects.collect { it.tasks.withType(Test) }
+}
+
+allprojects {
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat "full"
+            showCauses true
+            showExceptions true
+            showStackTraces true
+            events = ["passed", "skipped", "failed"]
+        }
+        reports {
+            html.enabled = false
+            junitXml.outputPerTestCase = true
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task testAll(dependsOn: ['app:build', 'app:connectedAndroidTest', 'apptest:connectedAndroidTest']) {
+task testAll(dependsOn: ['app:testDebugUnitTest', 'app:connectedDebugAndroidTest', 'app:uninstallDebug', 'apptest:connectedDebugAndroidTest']) {
     group = 'orchestration'
     description = "Run all tests"
 }
@@ -33,5 +81,11 @@ task testAll(dependsOn: ['app:build', 'app:connectedAndroidTest', 'apptest:conne
 gradle.projectsEvaluated {
     project(":apptest") {
         connectedDebugAndroidTest.dependsOn project(":app").installDebug
+    }
+}
+
+gradle.projectsEvaluated {
+    project(":app") {
+        installDebug.mustRunAfter project(":app").connectedDebugAndroidTest
     }
 }
