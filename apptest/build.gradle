@@ -41,6 +41,7 @@ dependencies {
     androidTestImplementation project(path: ':testcore')
     androidTestImplementation project(path: ':capture')
     androidTestImplementation project(path: ':flaky')
+    androidTestImplementation project(path: ':netcon')
 
     androidTestUtil 'androidx.test:orchestrator:1.3.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

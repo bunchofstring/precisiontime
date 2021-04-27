@@ -9,10 +9,10 @@ import androidx.test.uiautomator.Until;
 import com.bunchofstring.precisiontime.test.core.TestConfig;
 import com.bunchofstring.test.CoreUtils;
 
+import org.junit.Assert;
+
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import org.junit.Assert;
 
 public final class MainPageObject {
 

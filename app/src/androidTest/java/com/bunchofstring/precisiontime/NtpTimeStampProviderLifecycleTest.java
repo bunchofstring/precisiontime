@@ -2,16 +2,12 @@ package com.bunchofstring.precisiontime;
 
 import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
 import com.bunchofstring.test.LifecycleTestRule;
-import com.bunchofstring.test.flaky.Flaky;
-import com.bunchofstring.test.flaky.FlakyTestRule;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
-
-import java.util.Random;
 
 public class NtpTimeStampProviderLifecycleTest {
 

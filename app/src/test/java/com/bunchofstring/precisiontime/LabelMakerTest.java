@@ -1,13 +1,7 @@
 package com.bunchofstring.precisiontime;
 
-import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
-import com.bunchofstring.precisiontime.core.UnreliableTimeException;
-import com.bunchofstring.test.LifecycleTestRule;
-
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 
 import java.util.Locale;
 

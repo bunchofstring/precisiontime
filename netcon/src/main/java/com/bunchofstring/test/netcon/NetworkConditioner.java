@@ -1,16 +1,6 @@
-package com.bunchofstring.test;
+package com.bunchofstring.test.netcon;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiNetworkSpecifier;
-import android.os.Build;
-
-import androidx.test.platform.app.InstrumentationRegistry;
+import com.bunchofstring.test.CoreUtils;
 
 import java.util.Date;
 import java.util.logging.Level;
@@ -36,13 +26,6 @@ public class NetworkConditioner {
         setWifiEnabled(isWifiEnabledAtStart);
         setDataEnabled(isDataEnabledAtStart);
     }
-
-    /*private static boolean hasSavedWifiNetwork(final String ssid) throws IOException {
-        for(final WifiConfiguration wc : getWiFiManager().getConfiguredNetworks()){
-            if(ssid.equals(wc.SSID)) return true;
-        }
-        return false;
-    }*/
 
     public void setDataEnabled(final boolean enable) throws Exception {
         LOGGER.log(Level.INFO, "setDataEnabled(...) "+enable);
@@ -74,72 +57,14 @@ public class NetworkConditioner {
     public void pairConnectWifiNetwork(final String ssid) throws Exception {
         LOGGER.log(Level.INFO, "pairConnectWifiNetwork(...) "+ssid);
         CoreUtils.executeShellCommand("cmd wifi connect-network "+ssid+" open");
-
-        /*
-        final String ssidValue = "\""+ssid+"\"";
-        WifiManager wm = getWiFiManager();
-        WifiConfiguration wc = new WifiConfiguration();
-        wc.SSID = ssidValue;
-        int id = wm.addNetwork(wc);
-        //wm.disconnect();
-        wm.enableNetwork(id, true);
-        //wm.reconnect();*/
-
         awaitConnection();
     }
 
     public void pairConnectWifiNetwork(final String ssid, final String pass) throws Exception {
         LOGGER.log(Level.INFO, "pairConnectWifiNetwork(...) "+ssid);
         CoreUtils.executeShellCommand("cmd wifi connect-network "+ssid+" wpa2 "+pass);
-
-        /*
-        final String ssidValue = "\""+ssid+"\"";
-        final String passValue = "\""+pass+"\"";
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            WifiManager wm = getWiFiManager();
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssidValue;
-            wc.preSharedKey = passValue;
-            int id = wm.addNetwork(wc);
-            wm.disconnect();
-            wm.enableNetwork(id, true);
-            wm.reconnect();
-        }else{
-            WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
-            builder.setSsid(ssid);
-            builder.setWpa2Passphrase(pass);
-
-            WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
-
-            NetworkRequest.Builder networkRequestBuilder1 = new NetworkRequest.Builder();
-            networkRequestBuilder1.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-            networkRequestBuilder1.setNetworkSpecifier(wifiNetworkSpecifier);
-
-            NetworkRequest nr = networkRequestBuilder1.build();
-            ConnectivityManager cm = (ConnectivityManager) InstrumentationRegistry
-                    .getInstrumentation()
-                    .getContext()
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
-            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    super.onAvailable(network);
-                    LOGGER.log(Level.INFO, "onAvailable(...)");
-
-                    cm.bindProcessToNetwork(network);
-                }
-            };
-            cm.requestNetwork(nr, networkCallback);
-        }*/
-
         awaitConnection();
     }
-
-    /*private WifiManager getWiFiManager() throws Exception {
-        grantWiFiControlPrivileges();
-        final Context c = InstrumentationRegistry.getInstrumentation().getContext();
-        return (WifiManager) c.getSystemService(Context.WIFI_SERVICE);
-    }*/
 
     private void grantWiFiControlPrivileges() throws Exception {
         LOGGER.log(Level.INFO, "grantWiFiControlPrivileges()");

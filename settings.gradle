@@ -3,3 +3,5 @@ include ':testcore'
 include ':app'
 include ':flaky'
 include ':capture'
+include ':netcon'
+

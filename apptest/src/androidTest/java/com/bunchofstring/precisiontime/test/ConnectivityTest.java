@@ -1,14 +1,14 @@
 package com.bunchofstring.precisiontime.test;
 
+import com.bunchofstring.precisiontime.test.core.TestConfig;
 import com.bunchofstring.test.CoreUtils;
 import com.bunchofstring.test.FrameworkSpeedRule;
 import com.bunchofstring.test.LifecycleTestRule;
-import com.bunchofstring.test.NetworkConditioner;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
-import com.bunchofstring.test.flaky.Flaky;
 import com.bunchofstring.test.flaky.FlakyTestRule;
+import com.bunchofstring.test.netcon.NetworkConditioner;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -16,14 +16,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
+import org.junit.rules.Timeout;
 
 import java.io.IOException;
-import java.util.Random;
 
 //@Ignore("Only needed to demonstrate failure handling - using different mechanisms for repetition")
 public class ConnectivityTest {
 
-    private static NetworkConditioner networkConditioner;
+    private NetworkConditioner networkConditioner;
 
     @ClassRule
     public static TestRule classRule = new FrameworkSpeedRule();
@@ -34,6 +34,7 @@ public class ConnectivityTest {
             .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new FailureScreenshotTestWatcher())
+            .around(Timeout.seconds(TestConfig.TEST_TIMEOUT_SECONDS))
             .around(new LifecycleTestRule() {
                 @Override
                 public void before() throws Throwable {

@@ -20,6 +20,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
+import org.junit.rules.Timeout;
 
 public class CoreUiTest {
 
@@ -35,7 +36,8 @@ public class CoreUiTest {
             .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new AppLifecycleTestRule(TestConfig.PACKAGE_NAME))
-            .around(new FailureScreenshotTestWatcher());
+            .around(new FailureScreenshotTestWatcher())
+            .around(Timeout.seconds(TestConfig.TEST_TIMEOUT_SECONDS));
 
     @Flaky
     @Test

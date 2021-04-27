@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
+import org.junit.rules.Timeout;
 
 public class ColdStartTest {
 
@@ -27,7 +28,8 @@ public class ColdStartTest {
             .around(new ClapperboardTestWatcher())
             .around(new ColdStartTestRule(TestConfig.PACKAGE_NAME))
             .around(new AppLifecycleTestRule(TestConfig.PACKAGE_NAME))
-            .around(new FailureScreenshotTestWatcher());
+            .around(new FailureScreenshotTestWatcher())
+            .around(Timeout.seconds(TestConfig.TEST_TIMEOUT_SECONDS));
 
     @Test
     public void test_GivenNotRunning_WhenLaunch_ThenDoNotAutoFocus() {
