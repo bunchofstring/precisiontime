@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 
 public class AppPageObject {
 
-    private static final Logger LOGGER = Logger.getLogger(AppPageObject.class.getSimpleName());
-
     public static void launch(){
         CoreUtils.launchApp(TestConfig.PACKAGE_NAME);
     }

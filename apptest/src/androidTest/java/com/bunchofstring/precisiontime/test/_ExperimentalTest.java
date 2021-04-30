@@ -2,6 +2,7 @@ package com.bunchofstring.precisiontime.test;
 
 import com.bunchofstring.precisiontime.test.core.TestConfig;
 import com.bunchofstring.test.FrameworkSpeedRule;
+import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
@@ -23,7 +24,9 @@ import java.util.Random;
 public class _ExperimentalTest {
 
     @ClassRule
-    public static TestRule classRule = new FrameworkSpeedRule();
+    public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
+            .around(new FrameworkSpeedRule())
+            .around(new TouchMarkupRule());
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()

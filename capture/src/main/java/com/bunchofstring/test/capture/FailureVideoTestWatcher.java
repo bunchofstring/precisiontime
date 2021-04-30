@@ -44,6 +44,7 @@ public class FailureVideoTestWatcher extends TestWatcher {
         }
     }
 
+    @SuppressWarnings("unused")
     public FailureVideoTestWatcher keepSuccesses(final boolean keep){
         mKeepSuccesses = keep;
         return this;

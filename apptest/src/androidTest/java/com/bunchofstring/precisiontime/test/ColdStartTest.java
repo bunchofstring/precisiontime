@@ -5,6 +5,7 @@ import com.bunchofstring.precisiontime.test.pageobject.MainPageObject;
 import com.bunchofstring.test.AppLifecycleTestRule;
 import com.bunchofstring.test.ColdStartTestRule;
 import com.bunchofstring.test.FrameworkSpeedRule;
+import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
@@ -20,7 +21,9 @@ import org.junit.rules.Timeout;
 public class ColdStartTest {
 
     @ClassRule
-    public static TestRule classRule = new FrameworkSpeedRule();
+    public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
+            .around(new FrameworkSpeedRule())
+            .around(new TouchMarkupRule());
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()

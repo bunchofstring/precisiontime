@@ -22,7 +22,11 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
 
+import java.util.concurrent.TimeUnit;
+
 public class CoreUiTest {
+
+    private final static long NTP_FETCH_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
 
     @ClassRule
     public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
@@ -43,7 +47,7 @@ public class CoreUiTest {
     @Test
     public void test_WhenLaunch_ThenDisplayTime() {
         //Then
-        Assert.assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel());
+        Assert.assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT));
     }
 
     @Flaky
@@ -51,7 +55,7 @@ public class CoreUiTest {
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
-            Assert.assertNotNull("Time not displayed", MainPageObject.getTimeLabel());
+            Assert.assertNotNull("Time not displayed", MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT));
         });
 
         //When

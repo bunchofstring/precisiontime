@@ -4,6 +4,7 @@ import com.bunchofstring.precisiontime.test.core.TestConfig;
 import com.bunchofstring.test.CoreUtils;
 import com.bunchofstring.test.FrameworkSpeedRule;
 import com.bunchofstring.test.LifecycleTestRule;
+import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
@@ -20,13 +21,15 @@ import org.junit.rules.Timeout;
 
 import java.io.IOException;
 
-//@Ignore("Only needed to demonstrate failure handling - using different mechanisms for repetition")
 public class ConnectivityTest {
 
+    private static final String PING_TARGET = "8.8.8.8"; //Google DNS
     private NetworkConditioner networkConditioner;
 
     @ClassRule
-    public static TestRule classRule = new FrameworkSpeedRule();
+    public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
+            .around(new FrameworkSpeedRule())
+            .around(new TouchMarkupRule());
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()
@@ -83,7 +86,7 @@ public class ConnectivityTest {
     }
 
     private static boolean isPingSuccessful() throws IOException {
-        final String result = CoreUtils.executeShellCommand("ping -c 1 google.com");
+        final String result = CoreUtils.executeShellCommand("ping -c 1 "+PING_TARGET);
         return result.contains("bytes from");
     }
 }

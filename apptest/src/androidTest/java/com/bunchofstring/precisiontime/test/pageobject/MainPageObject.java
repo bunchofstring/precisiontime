@@ -18,9 +18,10 @@ public final class MainPageObject {
 
     private final static String RES_ID_PROGRESS_INDICATOR = "status_actively_syncing";
     private final static String RES_ID_TIME_LABEL = "current_time";
+    private final static String RES_NTP_HOST_FIELD = "ntp_host";
+
 
     private final static long SHORT_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.SECONDS);
-    private final static long LONG_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
     private final static long KEYBOARD_DISMISSAL_DELAY = TimeUnit.MILLISECONDS.toMillis(200L);
 
     private final static String VALID_NTP_HOST_0 = "0.pool.ntp.org";
@@ -42,15 +43,15 @@ public final class MainPageObject {
                 .res(TestConfig.PACKAGE_NAME, RES_ID_PROGRESS_INDICATOR)), SHORT_TIMEOUT);
     }
 
-    public static UiObject2 getTimeLabel(){
+    public static UiObject2 getTimeLabel(final long timeout){
         return CoreUtils.getDevice().wait(Until.findObject(By
                 .res(TestConfig.PACKAGE_NAME,RES_ID_TIME_LABEL)
-                .text(Pattern.compile(".*\\d.*"))), LONG_TIMEOUT);
+                .text(Pattern.compile(".*\\d.*"))), timeout);
     }
 
     public static UiObject2 getNtpHostField(){
         return CoreUtils.getDevice().wait(Until.findObject(By
-                .res(TestConfig.PACKAGE_NAME, "ntp_host")
+                .res(TestConfig.PACKAGE_NAME, RES_NTP_HOST_FIELD)
                 .clickable(true)), SHORT_TIMEOUT);
     }
 
@@ -61,6 +62,6 @@ public final class MainPageObject {
     }
 
     private static String getValidNtpHost(final String exclude){
-        return (VALID_NTP_HOST_0.equals(exclude) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0);
+        return VALID_NTP_HOST_0.equals(exclude) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0;
     }
 }
