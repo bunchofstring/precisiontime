@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
-public class NtpTimeStampProviderLifecycleTest {
+public final class NtpTimeStampProviderLifecycleTest {
 
     private NtpTimestampProvider ntp = new NtpTimestampProvider();
 

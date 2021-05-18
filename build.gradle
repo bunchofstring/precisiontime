@@ -19,6 +19,20 @@ allprojects {
         google()
         jcenter()
     }
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat "full"
+            showCauses true
+            showExceptions true
+            showStackTraces true
+            events = ["passed", "skipped", "failed"]
+        }
+        reports {
+            //html.enabled = false
+            //junitXml.enabled = false
+            junitXml.outputPerTestCase = true
+        }
+    }
 }
 
 
@@ -48,9 +62,10 @@ task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/allTests")
     // Include the results from the `test` task in all subprojects
     //mustRunAfter subprojects.collect { it.tasks.withType(Test) }
-    //reportOn subprojects*.test
+//reportOn getTasksByName("test", true)
+//reportOn subprojects*.test.binResultsDir
     testResultDirs.from(configurations.testReportData)
-    //reportOn subprojects.collect { it.tasks.withType(Test) }
+//reportOn subprojects.collect { it.tasks.withType(Test) }
 }
 
 allprojects {

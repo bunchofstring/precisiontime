@@ -6,7 +6,7 @@ import com.bunchofstring.test.CoreUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class AppPageObject {
+public final class AppPageObject {
 
     public static void launch(){
         CoreUtils.launchApp(TestConfig.PACKAGE_NAME);

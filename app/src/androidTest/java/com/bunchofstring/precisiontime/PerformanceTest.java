@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class PerformanceTest {
+public final class PerformanceTest {
 
     //@Category(PerformanceTests.class)
     @Test

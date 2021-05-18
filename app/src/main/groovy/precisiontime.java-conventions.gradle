@@ -1,11 +1,5 @@
-/*
 plugins {
     id 'java'
-}
-
-// Disable the test report for the individual test task
-test {
-    reports.html.enabled = false
 }
 
 // Share the test report data to be aggregated for the whole project
@@ -21,4 +15,3 @@ configurations {
         outgoing.artifact(test.binaryResultsDirectory)
     }
 }
-*/

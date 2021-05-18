@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-class LabelMaker {
+final class LabelMaker {
 
     private final static String TIME_ZONE = "UTC";
 

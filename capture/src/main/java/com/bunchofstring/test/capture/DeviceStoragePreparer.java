@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DeviceStoragePreparer {
+public final class DeviceStoragePreparer {
 
     private static final Logger LOGGER = Logger.getLogger(DeviceStoragePreparer.class.getSimpleName());
     //Environment.getExternalStorageDirectory().getPath()

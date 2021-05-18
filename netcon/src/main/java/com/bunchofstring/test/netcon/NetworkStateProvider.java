@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NetworkStateProvider {
+public final class NetworkStateProvider {
 
     private static final Logger LOGGER = Logger.getLogger(NetworkStateProvider.class.getSimpleName());
 

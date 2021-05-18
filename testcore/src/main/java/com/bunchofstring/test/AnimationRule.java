@@ -3,7 +3,7 @@ package com.bunchofstring.test;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class AnimationRule extends LifecycleTestRule {
+public final class AnimationRule extends LifecycleTestRule {
 
     private final Iterable<String> ANIMATION_SETTINGS = Arrays.asList(
             "transition_animation_scale",

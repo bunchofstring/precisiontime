@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.Locale;
 
-public class LabelMakerTest {
+public final class LabelMakerTest {
 
     private static final Locale DEFAULT_LOCALE = Locale.getDefault();
     private final LabelMaker lm = new LabelMaker();

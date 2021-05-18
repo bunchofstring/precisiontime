@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class RecordingInProgress {
+public final class RecordingInProgress {
 
     private static final Logger LOGGER = Logger.getLogger(RecordingInProgress.class.getSimpleName());
 
@@ -132,7 +133,7 @@ public class RecordingInProgress {
         LOGGER.log(Level.INFO, "Current PIDs = "+String.join(", ", current));
         List<String> existing = Arrays.asList(current);
         while(true){
-            List<String> difference = Arrays.asList(getScreenRecorderPids());
+            List<String> difference = new ArrayList<>(Arrays.asList(getScreenRecorderPids()));
             difference.removeAll(existing);
             if(!difference.isEmpty()){
                 return difference.get(0);
@@ -145,23 +146,9 @@ public class RecordingInProgress {
 
         mRecorder.submit(() -> {
             try{
-                final Point p = CoreUtils.getDevice().getDisplaySizeDp();
-                final DisplayMetrics dm = Resources.getSystem().getDisplayMetrics();
-                final int widthActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.x, dm));
-                final int heightActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.y, dm));
-
-                //At least one emulator on Windows cannot do screenrecord for anything bigger (not even at native display resolution)
-                final int widthAdjusted = 1024;
-                final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
-                //Ensure even number
-                final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
-
-                final String filePath = mFile.getCanonicalPath();
-                final String screenRecordCmd = String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
-                LOGGER.log(Level.INFO, String.format("Starting screen recording to %s", filePath));
-
+                final String cmd = getScreenRecordCommand();
                 //Blocking
-                CoreUtils.executeShellCommand(screenRecordCmd);
+                CoreUtils.executeShellCommand(cmd);
             } catch (Throwable t) {
                 throw new RuntimeException("Screen video capture operation failed", t);
             } finally {
@@ -177,5 +164,22 @@ public class RecordingInProgress {
             }
             mPid = awaitScreenRecorderPid(current);
         });
+    }
+
+    private String getScreenRecordCommand() throws IOException {
+        final Point p = CoreUtils.getDevice().getDisplaySizeDp();
+        final DisplayMetrics dm = Resources.getSystem().getDisplayMetrics();
+        final int widthActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.x, dm));
+        final int heightActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.y, dm));
+
+        //At least one emulator on Windows cannot do screenrecord for anything bigger (not even at native display resolution)
+        final int widthAdjusted = 1024;
+        final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
+        //Ensure even number
+        final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
+
+        final String filePath = mFile.getCanonicalPath();
+        LOGGER.log(Level.INFO, String.format(this+" "+"Prepared command for screen recording to %s", filePath));
+        return String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
     }
 }

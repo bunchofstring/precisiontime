@@ -21,7 +21,7 @@ import org.junit.rules.Timeout;
 
 import java.io.IOException;
 
-public class ConnectivityTest {
+public final class ConnectivityTest {
 
     private static final String PING_TARGET = "8.8.8.8"; //Google DNS
     private NetworkConditioner networkConditioner;

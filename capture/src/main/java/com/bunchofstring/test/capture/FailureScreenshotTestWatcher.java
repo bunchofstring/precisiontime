@@ -6,7 +6,7 @@ import org.junit.runner.Description;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FailureScreenshotTestWatcher extends TestWatcher {
+public final class FailureScreenshotTestWatcher extends TestWatcher {
 
     private static final Logger LOGGER = Logger.getLogger(FailureScreenshotTestWatcher.class.getSimpleName());
 

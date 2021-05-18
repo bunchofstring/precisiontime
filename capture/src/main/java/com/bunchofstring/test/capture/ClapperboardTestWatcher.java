@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class ClapperboardTestWatcher extends TestWatcher {
+public final class ClapperboardTestWatcher extends TestWatcher {
 
     private static final Logger LOGGER = Logger.getLogger(ClapperboardTestWatcher.class.getSimpleName());
 

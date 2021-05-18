@@ -1,6 +1,6 @@
 package com.bunchofstring.test;
 
-public class ColdStartTestRule extends LifecycleTestRule {
+public final class ColdStartTestRule extends LifecycleTestRule {
 
     private final String packageName;
 

@@ -24,7 +24,7 @@ import org.junit.rules.Timeout;
 
 import java.util.concurrent.TimeUnit;
 
-public class CoreUiTest {
+public final class CoreUiTest {
 
     private final static long NTP_FETCH_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
 

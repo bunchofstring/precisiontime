@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import androidx.test.runner.AndroidJUnitRunner;
 
-public class CustomInstrumentationRunner extends AndroidJUnitRunner {
+public final class CustomInstrumentationRunner extends AndroidJUnitRunner {
 
     @Override
     public void finish(int resultCode, Bundle results) {

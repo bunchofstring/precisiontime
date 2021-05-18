@@ -11,17 +11,18 @@ import com.bunchofstring.test.flaky.FlakyTestRule;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Request;
+import org.junit.runner.Result;
 
 import java.util.Random;
 
-@Ignore("Only needed to demonstrate failure handling")
-public class _ExperimentalTest {
+//@Ignore("Only needed to demonstrate failure handling")
+public final class _ExperimentalTest {
 
     @ClassRule
     public static RuleChain classRuleChain = RuleChain.emptyRuleChain()
@@ -36,19 +37,13 @@ public class _ExperimentalTest {
             .around(new FailureScreenshotTestWatcher())
             .around(Timeout.seconds(TestConfig.TEST_TIMEOUT_SECONDS));
 
-    @Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
+    @Flaky(iterations = 5, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_NonDeterministic() {
         final int range = 10;
         final int cutoffAfter = 2;
         final int value = new Random().nextInt(range)+1;
         Assert.assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
-    }
-
-    @Flaky
-    @Test
-    public void test_Flaky_Failure(){
-        Assert.fail("Flaky failure - as an example");
     }
 
     @Test
@@ -60,11 +55,10 @@ public class _ExperimentalTest {
         Assert.fail("Intentional failure - as an example");
     }
 
-    //TODO: This style of repetition interacts with the FailureVideoTestWatcher in such a way that crashes the test instrumentation process
-    /*@Test
+    @Test
     public void test_Repetition() throws Throwable {
         final Throwable throwableSummary = new Throwable("Failed reflective test execution");
-        final Request request = Request.method(CoreUiTest.class, "test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus");
+        final Request request = Request.method(_ExperimentalTest.class, "test_Failure");
         boolean hasFailures = false;
         for(int i = 0; i < 3; i++) {
             hasFailures = !runTest(request, throwableSummary) || hasFailures;
@@ -78,6 +72,5 @@ public class _ExperimentalTest {
         final Result result = new JUnitCore().run(request);
         result.getFailures().forEach(failure -> summary.addSuppressed(failure.getException()));
         return result.wasSuccessful();
-    }*/
-
+    }
 }

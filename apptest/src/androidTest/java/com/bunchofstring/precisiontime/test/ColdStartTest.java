@@ -18,7 +18,7 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
-public class ColdStartTest {
+public final class ColdStartTest {
 
     @ClassRule
     public static RuleChain classRuleChain = RuleChain.emptyRuleChain()

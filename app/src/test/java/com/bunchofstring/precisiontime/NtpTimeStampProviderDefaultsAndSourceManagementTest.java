@@ -9,7 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-public class NtpTimeStampProviderDefaultsAndSourceManagementTest {
+public final class NtpTimeStampProviderDefaultsAndSourceManagementTest {
 
     private static final String SAMPLE_HOST = "sample_host";
     private NtpTimestampProvider ntp;

@@ -20,7 +20,6 @@ public final class MainPageObject {
     private final static String RES_ID_TIME_LABEL = "current_time";
     private final static String RES_NTP_HOST_FIELD = "ntp_host";
 
-
     private final static long SHORT_TIMEOUT = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.SECONDS);
     private final static long KEYBOARD_DISMISSAL_DELAY = TimeUnit.MILLISECONDS.toMillis(200L);
 
@@ -34,7 +33,7 @@ public final class MainPageObject {
 
         //Needs a bit more time to dismiss the keyboard consistently
         final UiDevice device = CoreUtils.getDevice();
-        //device.waitForIdle(KEYBOARD_DISMISSAL_DELAY);
+        device.waitForIdle(KEYBOARD_DISMISSAL_DELAY);
         Assert.assertTrue("Could not enter the value", device.pressEnter());
     }
 
@@ -57,11 +56,11 @@ public final class MainPageObject {
 
     public static void changeNtpHost(){
         final String currentHost = getNtpHostField().getText();
-        final String nextHost = getValidNtpHost(currentHost);
+        final String nextHost = getNextValidNtpHost(currentHost);
         enterNtpHost(nextHost);
     }
 
-    private static String getValidNtpHost(final String exclude){
+    private static String getNextValidNtpHost(final String exclude){
         return VALID_NTP_HOST_0.equals(exclude) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0;
     }
 }

@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Capture {
+public final class Capture {
 
     private static final Logger LOGGER = Logger.getLogger(Capture.class.getSimpleName());
     private static final String VIDEO_SUFFIX = ".mp4";

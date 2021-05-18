@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class FlakyStatement extends Statement {
+final class FlakyStatement extends Statement {
 
     private static final Logger LOGGER = Logger.getLogger(FlakyStatement.class.getSimpleName());
 

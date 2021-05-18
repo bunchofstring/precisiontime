@@ -2,7 +2,7 @@ package com.bunchofstring.test;
 
 import java.io.IOException;
 
-public class AppLifecycleTestRule extends LifecycleTestRule {
+public final class AppLifecycleTestRule extends LifecycleTestRule {
 
     private final String packageName;
 

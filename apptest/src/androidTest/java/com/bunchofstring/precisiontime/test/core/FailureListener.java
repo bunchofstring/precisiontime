@@ -5,7 +5,7 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
-public class FailureListener extends RunListener {
+public final class FailureListener extends RunListener {
 
     @Override
     public void testFinished(Description description) throws Exception {

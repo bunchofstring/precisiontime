@@ -6,9 +6,13 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NetworkConditioner {
+public final class NetworkConditioner {
 
     private static final Logger LOGGER = Logger.getLogger(NetworkConditioner.class.getSimpleName());
+
+    private static final int CONNECTION_STATE_CHANGE_TIMEOUT_MILLISECONDS = 10_000;
+    private static final int TRAILING_DELAY_MILLISECONDS = 1000;
+    private static final int INITIAL_BACKOFF = 100;
 
     private final NetworkStateProvider nsp;
     private final boolean isWifiEnabledAtStart;
@@ -80,11 +84,11 @@ public class NetworkConditioner {
     private void awaitConnection() throws Exception {
         LOGGER.log(Level.INFO, "awaitConnection()");
         final long start = new Date().getTime();
-        int backoffWait = 100;
-        while(new Date().getTime() - start < 10_000){
-            LOGGER.log(Level.INFO, "awaitConnection() foobr");
+        int backoffWait = INITIAL_BACKOFF;
+        while(new Date().getTime() - start < CONNECTION_STATE_CHANGE_TIMEOUT_MILLISECONDS){
+            LOGGER.log(Level.INFO, "awaitConnection() busy wait");
             if(nsp.isWifiConnected()) {
-                Thread.sleep(1000);
+                Thread.sleep(TRAILING_DELAY_MILLISECONDS);
                 return;
             }
             Thread.sleep(backoffWait);
@@ -95,11 +99,11 @@ public class NetworkConditioner {
     private void awaitDisconnection() throws Exception {
         LOGGER.log(Level.INFO, "awaitDisconnection()");
         final long start = new Date().getTime();
-        int backoffWait = 100;
-        while(new Date().getTime() - start < 10_000){
-            LOGGER.log(Level.INFO, "awaitConnection() foobr");
+        int backoffWait = INITIAL_BACKOFF;
+        while(new Date().getTime() - start < CONNECTION_STATE_CHANGE_TIMEOUT_MILLISECONDS){
+            LOGGER.log(Level.INFO, "awaitDisconnection() busy wait");
             if(nsp.isWifiDisconnectedAndStable()) {
-                Thread.sleep(1000);
+                Thread.sleep(TRAILING_DELAY_MILLISECONDS);
                 return;
             }
             Thread.sleep(backoffWait);
