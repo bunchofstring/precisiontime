@@ -26,6 +26,7 @@ public final class RecordingInProgress {
 
     private static final Logger LOGGER = Logger.getLogger(RecordingInProgress.class.getSimpleName());
 
+    private static final int WIDTH_CONSTRAINT = 600;
     private static final String CMD = "screenrecord %s --size %dx%d --bit-rate 1000000 --verbose --bugreport --show-frame-time";
 
     private final ExecutorService mRecorder = Executors.newSingleThreadExecutor();
@@ -40,9 +41,7 @@ public final class RecordingInProgress {
 
     public void cancel(){
         finish(true);
-        mTeardown.submit(() -> {
-            deleteTemporaryFiles();
-        });
+        mTeardown.submit(this::deleteTemporaryFiles);
         gracefulEnd(mTeardown);
         awaitGracefulEnd(mTeardown);
     }
@@ -63,6 +62,7 @@ public final class RecordingInProgress {
             gracefulEnd(mTeardown);
             awaitGracefulEnd(mTeardown);
             try {
+                //TODO: Eliminate this ugly sleep!
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e);
@@ -158,6 +158,7 @@ public final class RecordingInProgress {
 
         mTeardown.submit(() -> {
             try {
+                //TODO: Eliminate this ugly sleep!
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, "Recording was interrupted", e);
@@ -173,13 +174,12 @@ public final class RecordingInProgress {
         final int heightActual = (int) Math.floor(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, p.y, dm));
 
         //At least one emulator on Windows cannot do screenrecord for anything bigger (not even at native display resolution)
-        final int widthAdjusted = 1024;
-        final int heightIntermediate = (int) Math.floor((double) (widthAdjusted * heightActual)/widthActual);
+        final int heightIntermediate = (int) Math.floor((double) (WIDTH_CONSTRAINT * heightActual)/widthActual);
         //Ensure even number
         final int heightAdjusted = heightIntermediate - (heightIntermediate % 2);
 
         final String filePath = mFile.getCanonicalPath();
-        LOGGER.log(Level.INFO, String.format(this+" "+"Prepared command for screen recording to %s", filePath));
-        return String.format(Locale.ENGLISH, CMD, filePath, widthAdjusted, heightAdjusted);
+        LOGGER.log(Level.INFO, String.format("Prepared command for screen recording to %s", filePath));
+        return String.format(Locale.ENGLISH, CMD, filePath, WIDTH_CONSTRAINT, heightAdjusted);
     }
 }
