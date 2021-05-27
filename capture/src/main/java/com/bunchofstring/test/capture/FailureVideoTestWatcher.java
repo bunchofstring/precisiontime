@@ -9,11 +9,11 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FailureVideoTestWatcher extends TestWatcher {
+public final class FailureVideoTestWatcher extends TestWatcher {
 
     private static final Logger LOGGER = Logger.getLogger(FailureVideoTestWatcher.class.getSimpleName());
 
-    private static final int ASSUMED_SCREENRECORD_LIMIT = 3 * 60 * 1000; //3 minutes
+    private static final int ASSUMED_SCREEN_RECORD_LIMIT = 3 * 60 * 1000; //3 minutes
     private static final int DEFAULT_PADDING = 2000; //Two seconds
 
     private final int mPadding;
@@ -33,7 +33,7 @@ public class FailureVideoTestWatcher extends TestWatcher {
      *                this increases execution time
      */
     public FailureVideoTestWatcher(final int padding) {
-        final Range<Integer> acceptableRange = new Range<>(0, ASSUMED_SCREENRECORD_LIMIT - 1);
+        final Range<Integer> acceptableRange = new Range<>(0, ASSUMED_SCREEN_RECORD_LIMIT - 1);
         if(acceptableRange.contains(padding)){
             mPadding = padding;
         }else{
@@ -44,7 +44,6 @@ public class FailureVideoTestWatcher extends TestWatcher {
         }
     }
 
-    @SuppressWarnings("unused")
     public FailureVideoTestWatcher keepSuccesses(final boolean keep){
         mKeepSuccesses = keep;
         return this;

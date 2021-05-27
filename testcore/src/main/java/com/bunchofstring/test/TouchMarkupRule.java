@@ -4,22 +4,26 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TouchMarkupRule extends LifecycleTestRule {
+public final class TouchMarkupRule extends LifecycleTestRule {
 
     private static final Logger LOGGER = Logger.getLogger(TouchMarkupRule.class.getSimpleName());
 
     @Override
     public void before(){
-        showVisualIndicators();
+        if(!showVisualIndicators()){
+            LOGGER.log(Level.WARNING, "Problem showing visual indicators");
+        }
     }
 
     @Override
     public void after(){
-        hideVisualIndicators();
+        if(!hideVisualIndicators()){
+            LOGGER.log(Level.WARNING, "Problem hiding visual indicators");
+        }
     }
 
     /**
-     * Show crosshairs for touches and leave a pixel trail
+     * Show cross-hairs for touches and leave a pixel trail
      * @return true if the device received the request to show the indicators, false otherwise
      */
     public static boolean showVisualIndicators(){
@@ -34,7 +38,7 @@ public class TouchMarkupRule extends LifecycleTestRule {
     }
 
     /**
-     * Hide crosshairs for touches as well as the pixel trail
+     * Hide cross-hairs for touches as well as the pixel trail
      * @return true if the device received the request to hide the indicators, false otherwise
      */
     public static boolean hideVisualIndicators(){

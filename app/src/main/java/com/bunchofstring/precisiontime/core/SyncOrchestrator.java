@@ -14,7 +14,7 @@ import io.reactivex.disposables.Disposable;
  * this helps minimize the total error due to drift.
  */
 
-final public class SyncOrchestrator {
+public final class SyncOrchestrator {
 
     private static final Logger LOGGER = Logger.getLogger(SyncOrchestrator.class.getSimpleName());
 
@@ -23,7 +23,6 @@ final public class SyncOrchestrator {
     private final Listener listener;
     private Disposable timer;
 
-    @SuppressWarnings("unused")
     private SyncOrchestrator(){
         throw new UnsupportedOperationException("Default constructor is not supported");
     }

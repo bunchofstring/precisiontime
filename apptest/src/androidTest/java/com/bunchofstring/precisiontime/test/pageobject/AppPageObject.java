@@ -4,7 +4,6 @@ import com.bunchofstring.precisiontime.test.core.TestConfig;
 import com.bunchofstring.test.CoreUtils;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 public final class AppPageObject {
 

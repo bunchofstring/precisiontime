@@ -24,7 +24,7 @@ final class FlakyStatement extends Statement {
 
     private final StringJoiner results = new StringJoiner("\n");
 
-    private final Collection<Throwable> supressedThrowables = new ArrayList<>();
+    private final Collection<Throwable> suppressedThrowableList = new ArrayList<>();
 
     FlakyStatement(final Statement base, final Description description, final Flaky flaky) {
         this.base = base;
@@ -35,7 +35,6 @@ final class FlakyStatement extends Statement {
         itemizeSummary = flaky.itemizeSummary();
     }
 
-    @SuppressWarnings("unused")
     private FlakyStatement() throws InstantiationException {
         throw new InstantiationException();
     }
@@ -50,7 +49,7 @@ final class FlakyStatement extends Statement {
             final FlakyException summaryException = new FlakyException(String.format(Locale.getDefault(),
                     "Failed %d/%d attempts (traceAllFailures=%b, itemizeSummary=%b)",
                     failureCount, iterations, traceAllFailures, itemizeSummary));
-            supressedThrowables.forEach(summaryException::addSuppressed);
+            suppressedThrowableList.forEach(summaryException::addSuppressed);
             throw summaryException;
         }
     }
@@ -99,7 +98,7 @@ final class FlakyStatement extends Statement {
     }
 
     private void handleTestFailure(final String iteration, final Throwable t) {
-        supressedThrowables.add(t);
+        suppressedThrowableList.add(t);
         final String oneLiner = String.format("Flaky test iteration %s failed", iteration);
 
         if(traceAllFailures){

@@ -17,12 +17,12 @@ public final class NtpTimeStampProviderDefaultsAndSourceManagementTest {
     @Rule
     public TestRule rule = new LifecycleTestRule() {
         @Override
-        public void before() throws Throwable {
+        public void before() {
             ntp = new NtpTimestampProvider();
         }
 
         @Override
-        public void after() throws Throwable {
+        public void after() {
             ntp = null;
         }
     };

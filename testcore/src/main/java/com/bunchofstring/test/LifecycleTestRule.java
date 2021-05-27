@@ -19,7 +19,7 @@ abstract public class LifecycleTestRule implements TestRule {
 
     /**
      * Reminder that clean up after tests is mandatory
-     * @throws Throwable
+     * @throws Throwable to catch anything that might go wrong in the subclass
      */
     public abstract void after() throws Throwable;
 

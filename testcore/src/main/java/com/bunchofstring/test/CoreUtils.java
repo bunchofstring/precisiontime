@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CoreUtils {
+public final class CoreUtils {
 
     private static final Logger LOGGER = Logger.getLogger(CoreUtils.class.getSimpleName());
     private static final long SHORT_TIMEOUT = 1000 * 5L;
@@ -62,7 +62,6 @@ public class CoreUtils {
 
     public static Context getTargetApplicationContext(Instrumentation i){
         return i.getTargetContext().getApplicationContext();
-        //TODO: See if ApplicationProvider.getApplicationContext() works just as well
     }
 
     public static boolean isEmulator(){

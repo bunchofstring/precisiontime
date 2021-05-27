@@ -8,8 +8,6 @@ import com.bunchofstring.test.TouchMarkupRule;
 import com.bunchofstring.test.capture.ClapperboardTestWatcher;
 import com.bunchofstring.test.capture.FailureScreenshotTestWatcher;
 import com.bunchofstring.test.capture.FailureVideoTestWatcher;
-import com.bunchofstring.test.flaky.Flaky;
-import com.bunchofstring.test.flaky.FlakyTestRule;
 import com.bunchofstring.test.netcon.NetworkConditioner;
 
 import org.junit.Assert;
@@ -17,7 +15,6 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import java.io.IOException;
@@ -34,7 +31,6 @@ public final class ConnectivityTest {
 
     @Rule
     public RuleChain testRuleChain = RuleChain.emptyRuleChain()
-            .around(new FlakyTestRule())
             .around(new FailureVideoTestWatcher())
             .around(new ClapperboardTestWatcher())
             .around(new FailureScreenshotTestWatcher())
@@ -52,7 +48,6 @@ public final class ConnectivityTest {
                 }
             });
 
-    //@Flaky(iterations = 10, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void testConnectionRecovery() throws Exception {
         //Arrange

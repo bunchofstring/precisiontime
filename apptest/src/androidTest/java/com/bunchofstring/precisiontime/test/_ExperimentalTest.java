@@ -11,6 +11,7 @@ import com.bunchofstring.test.flaky.FlakyTestRule;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -21,7 +22,7 @@ import org.junit.runner.Result;
 
 import java.util.Random;
 
-//@Ignore("Only needed to demonstrate failure handling")
+@Ignore("Only needed to demonstrate failure handling")
 public final class _ExperimentalTest {
 
     @ClassRule
@@ -40,18 +41,17 @@ public final class _ExperimentalTest {
     @Flaky(iterations = 5, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_NonDeterministic() {
-        final int range = 10;
-        final int cutoffAfter = 2;
-        final int value = new Random().nextInt(range)+1;
-        Assert.assertTrue(value + " is beyond the cutoff", value <= cutoffAfter);
+        Assert.assertTrue("Some uncontrolled factor influenced the test", maybeTrue());
     }
 
     @Test
     public void test_Pass(){
+        //Passes quickly
     }
 
     @Test
     public void test_Failure(){
+        //Fails quickly
         Assert.fail("Intentional failure - as an example");
     }
 
@@ -72,5 +72,12 @@ public final class _ExperimentalTest {
         final Result result = new JUnitCore().run(request);
         result.getFailures().forEach(failure -> summary.addSuppressed(failure.getException()));
         return result.wasSuccessful();
+    }
+
+    private boolean maybeTrue(){
+        final int cutoffAfter = 3;
+        final int range = 10;
+        final int value = new Random().nextInt(range)+1;
+        return value <= cutoffAfter;
     }
 }

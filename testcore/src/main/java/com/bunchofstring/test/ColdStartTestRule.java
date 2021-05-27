@@ -14,7 +14,7 @@ public final class ColdStartTestRule extends LifecycleTestRule {
     }
 
     @Override
-    public void after() throws Throwable {
+    public void after(){
         //No implementation
     }
 }

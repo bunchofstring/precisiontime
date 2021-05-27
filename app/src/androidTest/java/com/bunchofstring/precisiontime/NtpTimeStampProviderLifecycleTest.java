@@ -17,12 +17,12 @@ public final class NtpTimeStampProviderLifecycleTest {
     public TestRule rule = RuleChain.emptyRuleChain()
         .around(new LifecycleTestRule() {
             @Override
-            public void before() throws Throwable {
+            public void before() {
                 ntp = new NtpTimestampProvider();
             }
 
             @Override
-            public void after() throws Throwable {
+            public void after() {
                 ntp = null;
             }
         });

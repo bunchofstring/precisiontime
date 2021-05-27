@@ -33,7 +33,7 @@ public final class NetworkStateProvider {
     }
 
     private String getDataState() throws Exception {
-        //TODO: Check assumption that it is possible for "mDataConnectionState" to appear multiple times in the response
+        //Assumption: It is possible for "mDataConnectionState" to appear multiple times in the response
         final String result = CoreUtils.executeShellCommand("dumpsys telephony.registry");
         final int lastIndex = result.lastIndexOf("mDataConnectionState");
         if(lastIndex < 0) throw new RuntimeException("Could not determine Data state");

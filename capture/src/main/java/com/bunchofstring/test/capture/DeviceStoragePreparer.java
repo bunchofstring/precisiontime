@@ -40,7 +40,7 @@ public final class DeviceStoragePreparer {
         }
     }
 
-    public static File getDeviceSubdir(final String subDir){
+    public static File getDeviceSubDir(final String subDir){
         return new File(getDeviceDirPath().concat("/"+subDir+"/"));
     }
 }

@@ -1,5 +1,7 @@
 package com.bunchofstring.precisiontime.core;
 
+import androidx.annotation.NonNull;
+
 import com.instacart.library.truetime.TrueTimeRx;
 
 import java.util.Date;
@@ -11,13 +13,13 @@ import io.reactivex.Single;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-final public class NtpTimestampProvider implements TimestampProvider {
+public final class NtpTimestampProvider implements TimestampProvider {
 
     private static final Logger LOGGER = Logger.getLogger(NtpTimestampProvider.class.getSimpleName());
 
     private static final String DEFAULT_NTP_HOST = "pool.ntp.org";
 
-    TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(false);
+    private final TrueTimeRx tt = TrueTimeRx.build().withLoggingEnabled(false);
     private final GregorianCalendar currentTime = new GregorianCalendar();
     private final SyncOrchestrator syncOrchestrator = new SyncOrchestrator(this::sync);
 
@@ -40,7 +42,7 @@ final public class NtpTimestampProvider implements TimestampProvider {
 
     @Override
     public void stop() {
-        LOGGER.log(Level.INFO, "Stoping periodic sync");
+        LOGGER.log(Level.INFO, "Stopping periodic sync");
         isActive = false;
         cancelSync();
         syncOrchestrator.cancelScheduledSync();
@@ -142,7 +144,7 @@ final public class NtpTimestampProvider implements TimestampProvider {
     private DisposableSingleObserver<Date> newSyncOperation(final String host){
         final DisposableSingleObserver<Date> syncObserver = new DisposableSingleObserver<Date>() {
             @Override
-            public void onSuccess(Date date) {
+            public void onSuccess(@NonNull Date date) {
                 //Log.d(TAG, "Success initialized TrueTime :" + date.toString());
                 isSyncInProgress = false;
                 NtpTimestampProvider.this.onSync(date);
@@ -150,7 +152,7 @@ final public class NtpTimestampProvider implements TimestampProvider {
             }
 
             @Override
-            public void onError(Throwable e) {
+            public void onError(@NonNull Throwable e) {
                 //Log.e(TAG, "something went wrong when trying to initializeRx TrueTime", e);
                 isSyncInProgress = false;
                 NtpTimestampProvider.this.onError(e);

@@ -21,7 +21,7 @@ public final class Capture {
 
     public static boolean screenshot(final String subDirName, final String fileName){
         LOGGER.log(Level.INFO, "Attempting screenshot...");
-        final File dir = DeviceStoragePreparer.getDeviceSubdir(subDirName);
+        final File dir = DeviceStoragePreparer.getDeviceSubDir(subDirName);
         try {
             DeviceStoragePreparer.grantPermissions();
             DeviceStoragePreparer.ensureDeviceDirExists(dir);
@@ -40,12 +40,12 @@ public final class Capture {
 
     public static RecordingInProgress newVideoRecording(final String subDirName, final String fileName) throws CaptureException {
         LOGGER.log(Level.INFO, "Attempting video recording...");
-        final File dir = DeviceStoragePreparer.getDeviceSubdir(subDirName);
+        final File dir = DeviceStoragePreparer.getDeviceSubDir(subDirName);
 
         try {
             DeviceStoragePreparer.grantPermissions();
             DeviceStoragePreparer.ensureDeviceDirExists(dir);
-            return doScreenrecord(dir, fileName);
+            return doScreenRecord(dir, fileName);
         } catch (Throwable throwable) {
             /*
             Not recoverable during during test execution, but a caller should anticipate this
@@ -60,7 +60,7 @@ public final class Capture {
         }
     }
 
-    private static RecordingInProgress doScreenrecord(final File dir, final String fileName) throws IOException {
+    private static RecordingInProgress doScreenRecord(final File dir, final String fileName) throws IOException {
         final Path path = Files.createTempFile(dir.toPath(), fileName + "_", VIDEO_SUFFIX);
         return new RecordingInProgress(path.toFile());
     }

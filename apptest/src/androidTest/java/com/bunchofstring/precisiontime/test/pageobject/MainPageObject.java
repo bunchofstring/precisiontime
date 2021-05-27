@@ -56,11 +56,7 @@ public final class MainPageObject {
 
     public static void changeNtpHost(){
         final String currentHost = getNtpHostField().getText();
-        final String nextHost = getNextValidNtpHost(currentHost);
+        final String nextHost = currentHost.equals(VALID_NTP_HOST_0) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0;
         enterNtpHost(nextHost);
-    }
-
-    private static String getNextValidNtpHost(final String exclude){
-        return VALID_NTP_HOST_0.equals(exclude) ? VALID_NTP_HOST_1 : VALID_NTP_HOST_0;
     }
 }

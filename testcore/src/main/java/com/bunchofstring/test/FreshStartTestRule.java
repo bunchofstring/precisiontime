@@ -1,6 +1,6 @@
 package com.bunchofstring.test;
 
-public class FreshStartTestRule extends LifecycleTestRule {
+public final class FreshStartTestRule extends LifecycleTestRule {
 
     private final String packageName;
 
@@ -14,7 +14,7 @@ public class FreshStartTestRule extends LifecycleTestRule {
     }
 
     @Override
-    public void after() throws Throwable {
+    public void after(){
         //No implementation
     }
 }

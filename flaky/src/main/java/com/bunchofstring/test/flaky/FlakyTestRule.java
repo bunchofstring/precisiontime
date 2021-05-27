@@ -48,7 +48,7 @@ import org.junit.runners.model.Statement;
  * </pre>
  */
 
-public class FlakyTestRule implements TestRule {
+public final class FlakyTestRule implements TestRule {
 
     @Override @NonNull
     public Statement apply(@NonNull Statement base, @NonNull Description description) {

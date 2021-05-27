@@ -20,7 +20,7 @@ import com.bunchofstring.precisiontime.core.UnreliableTimeException;
 import java.util.Date;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public final class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static String KEY_HOST = "KEY_HOST";

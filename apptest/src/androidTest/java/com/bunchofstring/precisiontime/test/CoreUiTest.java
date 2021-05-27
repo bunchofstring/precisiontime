@@ -55,7 +55,8 @@ public final class CoreUiTest {
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
-            Assert.assertNotNull("Time not displayed", MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT));
+            final UiObject2 timeLabel = MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT);
+            Assert.assertNotNull("Time not displayed", timeLabel);
         });
 
         //When
@@ -68,12 +69,13 @@ public final class CoreUiTest {
     @Test
     public void test_GivenNoFocus_WhenClickServerUrl_ThenGainFocus() {
         //Given
+        final UiObject2 ntpHostField = MainPageObject.getNtpHostField();
         LifecycleTestRule.establishPrecondition(() -> {
-            Assert.assertFalse("Unexpected focus on NTP host field", MainPageObject.getNtpHostField().isFocused());
+            Assert.assertNotNull("Could not find the NTP host field", ntpHostField);
+            Assert.assertFalse("Unexpected focus on NTP host field", ntpHostField.isFocused());
         });
 
         //When
-        final UiObject2 ntpHostField = MainPageObject.getNtpHostField();
         ntpHostField.click();
 
         //Then

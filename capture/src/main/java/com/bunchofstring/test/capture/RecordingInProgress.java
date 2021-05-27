@@ -79,7 +79,8 @@ public final class RecordingInProgress {
         }
 
         try {
-            Files.delete(mFile.getParentFile().toPath());
+            final File parentFile = Objects.requireNonNull(mFile.getParentFile(), "Parent file cannot be null");
+            Files.delete(parentFile.toPath());
         } catch (DirectoryNotEmptyException ignored) {
             /*
             No implementation. We take the "tell, don't ask" approach to cleaning up a parent
@@ -100,19 +101,15 @@ public final class RecordingInProgress {
         try {
             executorService.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Graceful end was interrupted", e);
         }
     }
 
     private void killScreenRecorderProcess(final String pid){
         try {
             CoreUtils.executeShellCommand(String.format("kill -2 %s", pid));
-
-            //TODO: Find a way to ensure that kill works EVERY time on the screen recorder
-            //Sometimes kill does not work, so we run it twice to be sure
-            //CoreUtils.executeShellCommand(String.format("kill -2 %s", pid));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Could not kill screenrecord process "+pid, e);
         }
     }
 

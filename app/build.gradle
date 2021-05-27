@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '30.0.3' //''29.0.2'
+    buildToolsVersion '30.0.3'
     defaultConfig {
         applicationId "com.bunchofstring.precisiontime"
         minSdkVersion 26
@@ -33,7 +33,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.github.instacart.truetime-android:library:3.4'
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.4'

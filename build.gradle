@@ -3,11 +3,10 @@
 buildscript {
     repositories {
         google()
-        jcenter()
-        
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.3'
+        classpath 'com.android.tools.build:gradle:4.2.1'
         
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,7 +16,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     tasks.withType(Test) {
         testLogging {
@@ -33,39 +32,6 @@ allprojects {
             junitXml.outputPerTestCase = true
         }
     }
-}
-
-
-
-
-
-
-
-// A resolvable configuration to collect test reports data
-configurations {
-    testReportData {
-        canBeResolved = true
-        canBeConsumed = false
-        attributes {
-            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
-            attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, 'test-report-data'))
-        }
-    }
-}
-
-dependencies {
-    testReportData project('app')
-    //testReportData project('apptest')
-}
-
-task testReport(type: TestReport) {
-    destinationDir = file("$buildDir/reports/allTests")
-    // Include the results from the `test` task in all subprojects
-    //mustRunAfter subprojects.collect { it.tasks.withType(Test) }
-//reportOn getTasksByName("test", true)
-//reportOn subprojects*.test.binResultsDir
-    testResultDirs.from(configurations.testReportData)
-//reportOn subprojects.collect { it.tasks.withType(Test) }
 }
 
 allprojects {

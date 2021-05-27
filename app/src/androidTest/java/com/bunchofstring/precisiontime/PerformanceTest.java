@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -19,13 +18,12 @@ public final class PerformanceTest {
     //@Category(PerformanceTests.class)
     @Test
     public void test_GivenMemoryPressure_ThenOperateWithinThreshold() {
-        //TODO: Set a threshold based on actual. Fail if the measurement exceeds the threshold
+        //TODO: Fail if the measurement exceeds some threshold
         Log.d("performance (ActivityManager.MemoryInfo)", getActivityManagerMemoryReport());
         Log.d("performance (Debug.MemoryInfo)", getDebugMemoryReport());
     }
 
     private String getDebugMemoryReport(){
-        long startTime = new Date().getTime();
         Debug.MemoryInfo mi = new Debug.MemoryInfo();
         Debug.getMemoryInfo(mi);
 
