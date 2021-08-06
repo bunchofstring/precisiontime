@@ -12,6 +12,8 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,6 +41,20 @@ public final class CoreUtils {
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
         context.startActivity(intent);
         getDevice().wait(Until.findObject(By.pkg(packageName)), LONG_TIMEOUT);
+    }
+
+    private static Intent getLaunchIntent(final Context context, final String packageName) {
+        Intent intent = null;
+        //for(int i = 0; i < 10; i++){
+        intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+//            if(Objects.nonNull(intent)) break;
+//            try {
+//                Thread.sleep((long) Math.pow(i,3));
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        return intent;
     }
 
     public static void killApp(final String packageName) throws IOException {

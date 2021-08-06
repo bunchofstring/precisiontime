@@ -6,6 +6,7 @@ import com.instacart.library.truetime.TrueTimeRx;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,9 +109,8 @@ public final class NtpTimestampProvider implements TimestampProvider {
         if(lastSyncTimestamp == null || !TrueTimeRx.isInitialized()){
             return false;
         }else{
-            GregorianCalendar cal = new GregorianCalendar();
-            cal.setTime(lastSyncTimestamp);
-            long elapsedSinceLastSync = currentTime.getTimeInMillis() - cal.getTimeInMillis();
+            final long currentTime = TrueTimeRx.now().getTime();
+            final long elapsedSinceLastSync = currentTime - lastSyncTimestamp.getTime();
             return elapsedSinceLastSync < TimestampProvider.SYNC_INTERVAL_MS;
         }
     }
@@ -123,14 +123,19 @@ public final class NtpTimestampProvider implements TimestampProvider {
 
     private void onSync(Date now){
         LOGGER.log(Level.INFO, "Synchronized current time "+now);
-        lastSyncTimestamp = now;
-        currentTime.setTime(now);
+        setCurrentTime(now);
         cancelSync();
         syncOrchestrator.scheduleNextSync(now);
     }
 
+    private void setCurrentTime(Date now){
+        lastSyncTimestamp = now;
+        currentTime.setTime(now);
+    }
+
     private long millisecondsToSeconds(long milliseconds){
-        return (long)(((float) milliseconds) / 1000f);
+        return TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        //return (long)(((float) milliseconds) / 1000f);
     }
 
     private void sync(){
@@ -139,6 +144,11 @@ public final class NtpTimestampProvider implements TimestampProvider {
             isSyncInProgress = true;
             syncOperation = newSyncOperation(host);
         }
+    }
+
+    private void cancelSync(){
+        isSyncInProgress = false;
+        syncOperation.dispose();
     }
 
     private DisposableSingleObserver<Date> newSyncOperation(final String host){
@@ -167,10 +177,5 @@ public final class NtpTimestampProvider implements TimestampProvider {
                 .observeOn(Schedulers.io())
                 //Note: Method reference does not work for these subscribers
                 .subscribeWith(syncObserver);
-    }
-
-    private void cancelSync(){
-        isSyncInProgress = false;
-        syncOperation.dispose();
     }
 }

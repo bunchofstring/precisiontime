@@ -11,21 +11,20 @@ import org.junit.rules.TestRule;
 
 public final class NtpTimeStampProviderLifecycleTest {
 
-    private NtpTimestampProvider ntp = new NtpTimestampProvider();
+    private NtpTimestampProvider ntp;
 
     @Rule
-    public TestRule rule = RuleChain.emptyRuleChain()
-        .around(new LifecycleTestRule() {
-            @Override
-            public void before() {
-                ntp = new NtpTimestampProvider();
-            }
+    public TestRule rule = new LifecycleTestRule() {
+        @Override
+        public void before() {
+            ntp = new NtpTimestampProvider();
+        }
 
-            @Override
-            public void after() {
-                ntp = null;
-            }
-        });
+        @Override
+        public void after() {
+            ntp = null;
+        }
+    };
 
     @Test
     public void test_WhenStart_AttemptSync() {

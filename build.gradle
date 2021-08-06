@@ -6,8 +6,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
-        
+        classpath 'com.android.tools.build:gradle:4.2.2'
+        classpath 'org.jacoco:org.jacoco.core:0.8.6'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.20'
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -27,24 +29,8 @@ allprojects {
             events = ["passed", "skipped", "failed"]
         }
         reports {
-            //html.enabled = false
-            //junitXml.enabled = false
-            junitXml.outputPerTestCase = true
-        }
-    }
-}
-
-allprojects {
-    tasks.withType(Test) {
-        testLogging {
-            exceptionFormat "full"
-            showCauses true
-            showExceptions true
-            showStackTraces true
-            events = ["passed", "skipped", "failed"]
-        }
-        reports {
-            html.enabled = false
+            html.enabled = true
+            junitXml.enabled = true
             junitXml.outputPerTestCase = true
         }
     }
@@ -63,9 +49,6 @@ gradle.projectsEvaluated {
     project(":apptest") {
         connectedDebugAndroidTest.dependsOn project(":app").installDebug
     }
-}
-
-gradle.projectsEvaluated {
     project(":app") {
         installDebug.mustRunAfter project(":app").connectedDebugAndroidTest
     }

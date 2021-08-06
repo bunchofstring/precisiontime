@@ -9,9 +9,9 @@ public interface TimestampProvider {
     void restoreDefaultSource();
     void setSource(String host);
 
-    String getSource();
     long getTimestamp() throws UnreliableTimeException;
     long getSecondsToSync() throws UnreliableTimeException;
     long getSecondsSinceLastSync() throws UnreliableTimeException;
     boolean isSyncInProgress();
+    String getSource();
 }

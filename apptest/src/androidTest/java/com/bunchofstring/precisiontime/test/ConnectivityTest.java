@@ -53,32 +53,33 @@ public final class ConnectivityTest {
         //Arrange
         LifecycleTestRule.establishPrecondition(() -> {
             blockInternetConnectivity();
-            Assert.assertFalse("Internet connection is (unexpectedly) still active", isPingSuccessful());
+            Assert.assertFalse("Internet connection is (unexpectedly) still active", canLoadContentFromInternet());
         });
 
         //Act
         establishInternetConnectivity();
 
         //Assert
-        Assert.assertTrue("Internet connection did not recover", isPingSuccessful());
+        Assert.assertTrue("Internet connection did not recover", canLoadContentFromInternet());
+    }
+
+    //TODO: Exercise the conditioning capability to test an actual feature - instead of ping (which is already hardened)
+    private boolean canLoadContentFromInternet() throws Exception {
+        return isPingSuccessful();
     }
 
     private void establishInternetConnectivity() throws Exception {
         networkConditioner.setWifiEnabled(true);
-        connectWifiNetwork();
-    }
-
-    private void blockInternetConnectivity() throws Exception{
-        networkConditioner.setDataEnabled(false);
-        networkConditioner.setWifiEnabled(false);
-    }
-
-    private void connectWifiNetwork() throws Exception {
         if(CoreUtils.isEmulator()) {
             networkConditioner.pairConnectWifiNetwork("AndroidWifi");
         }else {
             networkConditioner.pairConnectWifiNetwork("test", "test");
         }
+    }
+
+    private void blockInternetConnectivity() throws Exception{
+        networkConditioner.setDataEnabled(false);
+        networkConditioner.setWifiEnabled(false);
     }
 
     private static boolean isPingSuccessful() throws IOException {

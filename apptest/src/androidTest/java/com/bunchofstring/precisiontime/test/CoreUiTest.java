@@ -1,5 +1,6 @@
 package com.bunchofstring.precisiontime.test;
 
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.uiautomator.UiObject2;
 
 import com.bunchofstring.precisiontime.test.core.TestConfig;
@@ -43,20 +44,40 @@ public final class CoreUiTest {
             .around(new FailureScreenshotTestWatcher())
             .around(Timeout.seconds(TestConfig.TEST_TIMEOUT_SECONDS));
 
-    @Flaky
+    //In a 50 iteration trial, failure rate was ~24%. Cause was always "timed out waiting for network time"
+    //3 iterations (opportunities to pass) reduces this to a ~1.4% failure rate
+    @Flaky(iterations = 3, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_WhenLaunch_ThenDisplayTime() {
         //Then
         Assert.assertNotNull("Timed out waiting for network time", MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT));
     }
 
-    @Flaky
+    //In a 50 iteration trial, failure rate was ~42%. Cause was always a "problem setting up" due to "time not displayed"
+    //5 iterations reduces this to a ~1.3% failure rate
+    //TODO: Leverage a test double for the NTP server
+    @Flaky(iterations = 5, traceAllFailures = true, itemizeSummary = true)
     @Test
     public void test_GivenTimeDisplayed_WhenChangeServerUrl_ThenInitiateReSync() {
         //Given
         LifecycleTestRule.establishPrecondition(() -> {
             final UiObject2 timeLabel = MainPageObject.getTimeLabel(NTP_FETCH_TIMEOUT);
             Assert.assertNotNull("Time not displayed", timeLabel);
+        });
+
+        //When
+        MainPageObject.changeNtpHost();
+
+        //Then
+        Assert.assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
+    }
+
+    @Test
+    public void test_GivenTimeSyncInProgress_WhenChangeServerUrl_ThenInitiateReSync() {
+        //Given
+        LifecycleTestRule.establishPrecondition(() -> {
+            MainPageObject.changeNtpHost();
+            Assert.assertNotNull("Time sync is not in progress", MainPageObject.getProgressIndicator());
         });
 
         //When
@@ -80,20 +101,5 @@ public final class CoreUiTest {
 
         //Then
         Assert.assertTrue("NTP host field not focused", ntpHostField.isFocused());
-    }
-
-    @Test
-    public void test_GivenTimeSyncInProgress_WhenChangeServerUrl_ThenInitiateReSync() {
-        //Given
-        LifecycleTestRule.establishPrecondition(() -> {
-            MainPageObject.changeNtpHost();
-            Assert.assertNotNull("Time sync is not in progress", MainPageObject.getProgressIndicator());
-        });
-
-        //When
-        MainPageObject.changeNtpHost();
-
-        //Then
-        Assert.assertNotNull("No indication of re-sync in progress", MainPageObject.getProgressIndicator());
     }
 }

@@ -37,7 +37,11 @@ public final class SyncOrchestrator {
         int second = currentTime.get(GregorianCalendar.SECOND);
         int millisecond = currentTime.get(GregorianCalendar.MILLISECOND);
         int value = 1000 * 60 * minute + 1000 * second + millisecond;
-        return TimestampProvider.SYNC_INTERVAL_MS - value % TimestampProvider.SYNC_INTERVAL_MS;
+        if(value == TimestampProvider.SYNC_INTERVAL_MS){
+            return 0;
+        }else {
+            return TimestampProvider.SYNC_INTERVAL_MS - value % TimestampProvider.SYNC_INTERVAL_MS;
+        }
     }
 
     public void scheduleNextSync(final Date now){

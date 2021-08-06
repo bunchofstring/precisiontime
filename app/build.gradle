@@ -1,4 +1,11 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'jacoco'
+
+//TODO: Confirm if this is really necessary
+jacoco {
+    toolVersion = "0.8.6"
+}
 
 android {
     compileSdkVersion 30
@@ -12,6 +19,9 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         testOptions {
             //execution 'ANDROIDX_TEST_ORCHESTRATOR'
+            unitTests {
+                includeAndroidResources = true
+            }
         }
     }
     buildTypes {
@@ -19,35 +29,81 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    testOptions {
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+                excludes = ['jdk.internal.*']
+            }
+        }
+        unitTests.returnDefaultValues = true
+    }
 }
 
 repositories {
     maven { url "https://jitpack.io" }
+    mavenCentral()
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.github.instacart.truetime-android:library:3.4'
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.4'
 
-    testImplementation 'androidx.test.ext:junit:1.1.2'
-
-    androidTestUtil 'androidx.test:orchestrator:1.3.0'
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
-    androidTestImplementation 'androidx.test:core:1.3.0'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test:rules:1.3.0'
+    androidTestUtil 'androidx.test:orchestrator:1.4.0'
 
     testImplementation project(path: ':testcore')
+    testImplementation project(path: ':flaky')
+    testImplementation 'androidx.test.ext:junit:1.1.3'
+    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation 'androidx.test:runner:1.4.0'
+    testImplementation 'androidx.test:rules:1.4.0'
+    testImplementation 'org.robolectric:robolectric:4.5.1'
+    testImplementation "org.mockito:mockito-core:3.11.2"
+    testImplementation "org.mockito:mockito-inline:3.11.2"
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:3.2.0'
+
     androidTestImplementation project(path: ':testcore')
     androidTestImplementation project(path: ':flaky')
     androidTestImplementation project(path: ':capture')
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test:core:1.4.0'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation "androidx.core:core-ktx:1.6.0"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest','connectedAndroidTest']) {
+    group = "Reporting"
+    description = "Generates Java code coverage (JaCoCo) reports"
+    reports {
+        xml.enabled true
+        html.enabled true
+        csv.enabled true
+    }
+
+    sourceDirectories.from = file("$project.projectDir/src/main/java")
+    classDirectories.from = fileTree(dir: project.buildDir.absolutePath,
+            includes: ["**/javac/debug/**/*.class"],
+            excludes: [
+                    '**/R.class',
+                    '**/R$*.class',
+                    '**/BuildConfig.*'
+            ])
+    executionData.from = fileTree(dir: project.buildDir.absolutePath,
+            includes: [
+                    "**/*.exec", //Unit tests //TODO: This file unintentionally collects the execution data for UI tests (i.e. apptest)
+                    "**/*.ec" //Instrumented unit tests
+            ])
 }

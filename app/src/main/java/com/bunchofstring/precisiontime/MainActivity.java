@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bunchofstring.precisiontime.core.NtpTimestampProvider;
@@ -19,13 +20,15 @@ import com.bunchofstring.precisiontime.core.UnreliableTimeException;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public final class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static String KEY_HOST = "KEY_HOST";
 
-    private final TimestampProvider timestampProvider = new NtpTimestampProvider();
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public TimestampProvider timestampProvider = new NtpTimestampProvider(); /* TODO: This should be final. Only variable so a test can override it :( */
     private final ValueAnimator animator = new ValueAnimator();
 
     private long previousFrameTimestamp;
@@ -40,7 +43,6 @@ public final class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ((TextView) findViewById(R.id.ntp_host)).setText(getHost());
 
         animator.setObjectValues(0L);
         animator.setRepeatCount(ValueAnimator.INFINITE);
@@ -50,6 +52,9 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        timestampProvider.setSource(getHost());
+        timestampProvider.start();
+
         currentTimeLabel = findViewById(R.id.current_time);
         frameSpacingLabel = findViewById(R.id.delay_between_frames);
         syncCountdownLabel = findViewById(R.id.sync_countdown);
@@ -60,8 +65,8 @@ public final class MainActivity extends AppCompatActivity {
         hostField.setOnKeyListener(this::onKey);
         animator.addUpdateListener((animation) -> onFrameValue((long) animation.getAnimatedValue()));
         animator.start();
-        timestampProvider.setSource(getHost());
-        timestampProvider.start();
+
+        ((TextView) findViewById(R.id.ntp_host)).setText(getHost());
     }
 
     @Override
@@ -76,20 +81,6 @@ public final class MainActivity extends AppCompatActivity {
         timeSinceSyncLabel = null;
         hostField = null;
         syncStatus = null;
-    }
-
-    private String getHost(){
-        SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
-        String defaultSource = timestampProvider.getSource();
-        return sp.getString(KEY_HOST, defaultSource);
-    }
-
-    private void setHost(String host){
-        Log.d(TAG,"setHost(...) host="+host);
-        SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
-        sp.edit().putString(KEY_HOST, host).apply();
-        hostField.setText(host);
-        timestampProvider.setSource(host);
     }
 
     private void onFrameValue(long value){
@@ -127,4 +118,22 @@ public final class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    private String getHost(){
+        SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
+        String defaultSource = timestampProvider.getSource();
+        return sp.getString(KEY_HOST, defaultSource);
+    }
+
+    private void setHost(String host){
+        Log.d(TAG,"setHost(...) host="+host);
+        SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
+        sp.edit().putString(KEY_HOST, host).apply();
+        hostField.setText(host);
+        timestampProvider.setSource(host);
+    }
+public boolean tester(){
+        return timestampProvider.isSyncInProgress();
+}
+
 }
