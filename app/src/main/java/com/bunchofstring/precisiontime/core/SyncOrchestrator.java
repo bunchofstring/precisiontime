@@ -45,6 +45,7 @@ public final class SyncOrchestrator {
     }
 
     public void scheduleNextSync(final Date now){
+        disposeTimer();
         timer = Completable
                 .timer(getMillisecondsUntilSync(now), TimeUnit.MILLISECONDS)
                 .subscribe(() -> {

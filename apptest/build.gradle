@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 30
@@ -49,8 +48,6 @@ dependencies {
     androidTestImplementation 'androidx.test:core:1.4.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
-    //implementation "androidx.core:core-ktx:+"
-    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
 }
 
 buildscript {

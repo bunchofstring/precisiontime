@@ -1,5 +1,6 @@
 package com.bunchofstring.precisiontime
 
+import android.os.Build
 import android.view.KeyEvent
 import android.widget.EditText
 import android.widget.TextView
@@ -14,9 +15,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.robolectric.annotation.Config
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.O])
 class MainActivityTest {
 
     @Rule

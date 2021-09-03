@@ -2,6 +2,7 @@ package com.bunchofstring.precisiontime;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +22,8 @@ import com.bunchofstring.precisiontime.core.UnreliableTimeException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class MainActivity extends AppCompatActivity {
 
@@ -28,7 +31,7 @@ public final class MainActivity extends AppCompatActivity {
     private final static String KEY_HOST = "KEY_HOST";
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    public TimestampProvider timestampProvider = new NtpTimestampProvider(); /* TODO: This should be final. Only variable so a test can override it :( */
+    protected TimestampProvider timestampProvider = new NtpTimestampProvider(); /* TODO: This should be final. Only variable so a test can override it :( */
     private final ValueAnimator animator = new ValueAnimator();
 
     private long previousFrameTimestamp;
@@ -52,9 +55,6 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        timestampProvider.setSource(getHost());
-        timestampProvider.start();
-
         currentTimeLabel = findViewById(R.id.current_time);
         frameSpacingLabel = findViewById(R.id.delay_between_frames);
         syncCountdownLabel = findViewById(R.id.sync_countdown);
@@ -66,7 +66,32 @@ public final class MainActivity extends AppCompatActivity {
         animator.addUpdateListener((animation) -> onFrameValue((long) animation.getAnimatedValue()));
         animator.start();
 
-        ((TextView) findViewById(R.id.ntp_host)).setText(getHost());
+//        final String intendedHost = getHostFromIntent(getIntent());
+//        final String rememberedHost = getRememberedHost();
+//        if(Objects.nonNull(intendedHost)){
+//            hostField.setText(intendedHost);
+//            timestampProvider.setSource(intendedHost);
+//        }else if(Objects.nonNull(rememberedHost)){
+//            hostField.setText(rememberedHost);
+//            timestampProvider.setSource(rememberedHost);
+//        }else{
+//            hostField.setText(timestampProvider.getSource());
+//        }
+
+        final String host = getPresetHost().orElse(timestampProvider.getSource());
+        hostField.setText(host);
+        timestampProvider.setSource(host);
+        timestampProvider.start();
+    }
+
+    private Optional<String> getPresetHost(){
+        final String[] potentialHosts = {
+                getHostFromIntent(getIntent()),
+                getRememberedHost()
+        };
+        return Stream.of(potentialHosts)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
     @Override
@@ -112,28 +137,32 @@ public final class MainActivity extends AppCompatActivity {
 
     private boolean onKey(View v, int keyCode, KeyEvent event) {
         if ((event.getAction() == KeyEvent.ACTION_UP) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-            setHost(((EditText) v).getText().toString());
             hostField.clearFocus();
             new Handler(getMainLooper()).postDelayed(() -> findViewById(R.id.outer_container).requestFocus(), 1L);
+
+            final String host = ((EditText) v).getText().toString();
+            setRememberedHost(host);
+            timestampProvider.setSource(host);
         }
         return false;
     }
 
-    private String getHost(){
-        SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
-        String defaultSource = timestampProvider.getSource();
-        return sp.getString(KEY_HOST, defaultSource);
+    //Primarily used for testing purposes
+    private String getHostFromIntent(final Intent intent){
+        final String requestedHost = intent.getStringExtra(KEY_HOST);
+        Log.d(TAG,"getHostFromIntent(...) host="+requestedHost);
+        return requestedHost;
     }
 
-    private void setHost(String host){
-        Log.d(TAG,"setHost(...) host="+host);
+    private String getRememberedHost(){
+        final SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
+        final String rememberedHost = sp.getString(KEY_HOST, null);
+        Log.d(TAG,"getRememberedHost(...) host="+rememberedHost);
+        return rememberedHost;
+    }
+
+    private void setRememberedHost(final String host){
         SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
         sp.edit().putString(KEY_HOST, host).apply();
-        hostField.setText(host);
-        timestampProvider.setSource(host);
     }
-public boolean tester(){
-        return timestampProvider.isSyncInProgress();
-}
-
 }

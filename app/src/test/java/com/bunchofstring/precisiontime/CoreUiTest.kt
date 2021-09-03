@@ -1,40 +1,28 @@
 package com.bunchofstring.precisiontime
 
-import android.os.Looper
+import android.os.Build
 import android.view.KeyEvent
 import android.view.View
 import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bunchofstring.precisiontime.core.NtpTimestampProvider
 import com.bunchofstring.precisiontime.core.TimestampProvider
 import com.bunchofstring.precisiontime.core.UnreliableTimeException
 import com.bunchofstring.test.LifecycleTestRule
-import com.bunchofstring.test.flaky.Flaky
 import com.bunchofstring.test.flaky.FlakyTestRule
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.kotlin.mock
-import org.mockito.verification.VerificationMode
-import org.robolectric.Robolectric
-import org.robolectric.Shadows
-import org.robolectric.annotation.LooperMode
-import org.robolectric.shadow.api.Shadow
-import org.robolectric.shadows.ShadowPausedLooper
+import org.robolectric.annotation.Config
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.O])
 class CoreUiTest {
 
     private val HOST_VALUE = "HOST_VALUE_TEST"
@@ -59,7 +47,6 @@ class CoreUiTest {
                         mockNtpTimestampProvider = Mockito.spy(activity.timestampProvider)
                         activity.timestampProvider = mockNtpTimestampProvider
                     }
-
             }
             override fun after() {
                 //No implementation
@@ -70,13 +57,13 @@ class CoreUiTest {
 
     @Test
     fun test_DisplayReliableTime(){
-        //Given
+        //Arrange
         simulateReliableTime(mockNtpTimestampProvider)
 
-        //When
+        //Act
         activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-        //Then
+        //Assert
         val view: TextView = activity.findViewById(R.id.current_time)
         Assert.assertTrue(
             "Could not display reliable time. Instead, found "+view.text+".",
@@ -86,49 +73,49 @@ class CoreUiTest {
 
     @Test
     fun test_SyncInProgress(){
-        //Given
+        //Arrange
         Mockito.doReturn(true)
             .`when`(mockNtpTimestampProvider)
             .isSyncInProgress
 
-        //When
+        //Act
         activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-        //Then
+        //Assert
         val view = activity.findViewById(R.id.status_actively_syncing) as View
         Assert.assertEquals(
-            "Does not appear to be syncing."+activity.tester(),
+            "Does not appear to be syncing.",
             View.VISIBLE, view.visibility
         )
     }
 
     @Test
     fun test_SyncNotInProgress(){
-        //Given
+        //Arrange
         Mockito.doReturn(false)
             .`when`(mockNtpTimestampProvider)
             .isSyncInProgress
 
-        //When
+        //Act
         activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-        //Then
+        //Assert
         val view = activity.findViewById(R.id.status_actively_syncing) as View
         Assert.assertEquals(
-            "Appears to be actively syncing. "+activity.tester(),
+            "Appears to be actively syncing.",
             View.GONE, view.visibility
         )
     }
 
     @Test
     fun test_HideUnreliableTime(){
-        //Given
+        //Arrange
         simulateUnreliableTime(mockNtpTimestampProvider)
 
-        //When
+        //Act
         activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-        //Then
+        //Assert
         val view: TextView = activity.findViewById(R.id.current_time)
         Assert.assertTrue(
             "Displayed unreliable time " + view.text,
@@ -138,16 +125,20 @@ class CoreUiTest {
 
     @Test
     fun test_NtpHostFieldAction(){
-        //Given
+        //Arrange
         activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         Mockito.clearInvocations(mockNtpTimestampProvider)
 
-        //When
+        //Act
         val view: EditText = activity.findViewById(R.id.ntp_host)
         view.setText(HOST_VALUE)
         view.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+//Espresso.onView(ViewMatchers.withId(R.id.ntp_host))
+//    .perform(ViewActions.typeText(HOST_VALUE))
+//    .perform(ViewActions.pressImeActionButton())
+//    .perform(ViewActions.closeSoftKeyboard())
 
-        //Then
+        //Assert
         Mockito.verify(mockNtpTimestampProvider).source = HOST_VALUE
     }
 

@@ -50,6 +50,32 @@ public final class RecordingInProgress {
         finish(false);
     }
 
+    private void start(){
+        String [] current = getScreenRecorderPids();
+
+        mRecorder.submit(() -> {
+            try{
+                final String cmd = getScreenRecordCommand();
+                //Blocks
+                CoreUtils.executeShellCommand(cmd);
+            } catch (Throwable t) {
+                throw new RuntimeException("Screen video capture operation failed", t);
+            } finally {
+                mRecorder.shutdown();
+            }
+        });
+
+        mTeardown.submit(() -> {
+            try {
+                //TODO: Eliminate this ugly sleep!
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARNING, "Recording was interrupted", e);
+            }
+            mPid = awaitScreenRecorderPid(current);
+        });
+    }
+
     private void finish(final boolean skipGracefulEnd){
         mTeardown.submit(() -> {
             LOGGER.log(Level.INFO, "Finishing screen recording at " + mFile);
@@ -136,32 +162,6 @@ public final class RecordingInProgress {
                 return difference.get(0);
             }
         }
-    }
-
-    private void start(){
-        String [] current = getScreenRecorderPids();
-
-        mRecorder.submit(() -> {
-            try{
-                final String cmd = getScreenRecordCommand();
-                //Blocking
-                CoreUtils.executeShellCommand(cmd);
-            } catch (Throwable t) {
-                throw new RuntimeException("Screen video capture operation failed", t);
-            } finally {
-                mRecorder.shutdown();
-            }
-        });
-
-        mTeardown.submit(() -> {
-            try {
-                //TODO: Eliminate this ugly sleep!
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Recording was interrupted", e);
-            }
-            mPid = awaitScreenRecorderPid(current);
-        });
     }
 
     private String getScreenRecordCommand() throws IOException {

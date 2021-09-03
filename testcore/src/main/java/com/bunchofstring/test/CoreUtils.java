@@ -12,8 +12,6 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;
 
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +35,7 @@ public final class CoreUtils {
     }
 
     public static void launchApp(final String packageName) {
-        Context context = ApplicationProvider.getApplicationContext();
+        final Context context = ApplicationProvider.getApplicationContext();
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
         context.startActivity(intent);
         getDevice().wait(Until.findObject(By.pkg(packageName)), LONG_TIMEOUT);
@@ -68,7 +66,7 @@ public final class CoreUtils {
     }
 
     public static UiDevice getDevice(){
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         return UiDevice.getInstance(instrumentation);
     }
 

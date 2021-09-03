@@ -2,7 +2,8 @@ package com.bunchofstring.test;
 
 import java.io.IOException;
 
-public final class AppLifecycleTestRule extends LifecycleTestRule {
+//TODO: Normally would be final. Only opened it so the test can launch *with arguments* for CoreUiTest
+public class AppLifecycleTestRule extends LifecycleTestRule {
 
     private final String packageName;
 
@@ -16,7 +17,7 @@ public final class AppLifecycleTestRule extends LifecycleTestRule {
     }
 
     @Override
-    public void after() throws IOException {
+    public final void after() throws IOException {
         CoreUtils.killApp(packageName);
     }
 }

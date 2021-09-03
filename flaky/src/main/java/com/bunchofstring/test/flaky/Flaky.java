@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 public @interface Flaky {
     /**
      * Optionally, specify the number of <code>iterations</code> required to determine the test
-     * result. Must be in the range of 2 to Integer.MAX_VALUE, inclusive. Default is 3.
+     * result. Must be in the range of 1 to Integer.MAX_VALUE, inclusive. Default is 3.
      */
     int iterations() default 3;
 
