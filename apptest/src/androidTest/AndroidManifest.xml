@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!--Android 11-->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-feature android:name="android.permission.WRITE_SETTINGS" android:required="false" />
 

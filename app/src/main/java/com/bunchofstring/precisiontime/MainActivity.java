@@ -137,8 +137,9 @@ public final class MainActivity extends AppCompatActivity {
 
     private boolean onKey(View v, int keyCode, KeyEvent event) {
         if ((event.getAction() == KeyEvent.ACTION_UP) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-            hostField.clearFocus();
-            new Handler(getMainLooper()).postDelayed(() -> findViewById(R.id.outer_container).requestFocus(), 1L);
+            //hostField.clearFocus();
+            //new Handler(getMainLooper()).postDelayed(() -> findViewById(R.id.outer_container).requestFocus(), 1L);
+new Handler(getMainLooper()).postDelayed(() -> hostField.clearFocus(), 10L);
 
             final String host = ((EditText) v).getText().toString();
             setRememberedHost(host);
